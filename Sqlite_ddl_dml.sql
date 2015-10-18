@@ -45,8 +45,11 @@ AS
    SELECT template.display_from,
           template.subject,
 		  eventdate.information_regex as date_regex,
+		  eventdate.email_component as date_component,
 		  eventloc.information_regex as location_regex,
-		  eventname.information_regex as name_regex
+		  eventloc.email_component as location_component,
+		  eventname.information_regex as name_regex,
+		  eventname.email_component as name_component
    FROM    INCIDENT_FILTER_TEMPLATE template
    INNER JOIN  INCIDENT_TEMPLATE_DETAILS eventdate ON template.template_id = eventdate.template_id AND eventdate.information_type ='EVENT_DATE'
    INNER JOIN  INCIDENT_TEMPLATE_DETAILS eventloc ON template.template_id = eventloc.template_id AND eventloc.information_type ='EVENT_LOCATION'

@@ -28,6 +28,60 @@ public class DBManager implements Serializable {
 		return db;
 	}
 
+	public DBQuery executeSqlWithoutParameters(String sql) {
+		BasicDataSource datasource = (BasicDataSource) DBCPDataSourceFactory
+				.getDataSource(IncidentMonitorConstants.database_type);
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			con = datasource.getConnection();
+			ps = con.prepareStatement(sql);
+			rs = ps.executeQuery();
+			DBQuery dq = new DBQuery(con, rs, ps);
+			return dq;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			rs = null;
+		}
+		return null;
+	}
+
+	public DBQuery executeLikeSql_v2(String sql, Object... params) {
+		BasicDataSource datasource = (BasicDataSource) DBCPDataSourceFactory
+				.getDataSource(IncidentMonitorConstants.database_type);
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		int i = 1;
+		try {
+			con = datasource.getConnection();
+			ps = con.prepareStatement(sql);
+			for (Object arg : params) {
+				if (arg instanceof Date) {
+					ps.setTimestamp(i++, new Timestamp(((Date) arg).getTime()));
+				} else if (arg instanceof Integer) {
+					ps.setString(i++, "%" + (Integer) arg + "%");
+				} else if (arg instanceof Long) {
+					ps.setString(i++, "%" + (Long) arg + "%");
+				} else if (arg instanceof Double) {
+					ps.setString(i++, "%" + (Double) arg + "%");
+				} else if (arg instanceof Float) {
+					ps.setString(i++, "%" + (Float) arg + "%");
+				} else {
+					ps.setString(i++, "%" + (String) arg + "%");
+				}
+			}
+			rs = ps.executeQuery();
+			DBQuery dq = new DBQuery(con, rs, ps);
+			return dq;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			rs = null;
+		}
+		return null;
+	}
+
 	public ResultSet executeLikeSql(String sql, Object... params) {
 		BasicDataSource datasource = (BasicDataSource) DBCPDataSourceFactory
 				.getDataSource(IncidentMonitorConstants.database_type);
@@ -58,17 +112,6 @@ public class DBManager implements Serializable {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			rs = null;
-		} finally {
-			try {
-				if (ps != null)
-					ps.close();
-				if (con != null)
-					con.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-				rs = null;
-			}
-
 		}
 		return rs;
 	}
@@ -103,19 +146,6 @@ public class DBManager implements Serializable {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			rs = null;
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (ps != null)
-					ps.close();
-				if (con != null)
-					con.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-				rs = null;
-			}
-
 		}
 		return rs;
 	}

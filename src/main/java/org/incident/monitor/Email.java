@@ -107,4 +107,8 @@ public class Email implements Serializable {
 		this.messageDate = messageDate;
 	}
 
+	public void addIncident(Incident i) {
+		this.incidents.add(i);
+	}
+
 }
