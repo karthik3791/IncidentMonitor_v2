@@ -1,4 +1,4 @@
-package org.incident.monitortest;
+package org.incident.monitor.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;

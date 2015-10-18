@@ -111,17 +111,18 @@ public class FilterTemplateBolt extends BaseBasicBolt {
 			if (this.checkFilter(rawEmail)) {
 				System.out.println("Email from " + rawEmail.getDisplayFrom() + " and subject " + rawEmail.getSubject()
 						+ " was filtered.");
-			}
-			if (this.checkAndProcessTemplate(rawEmail)) { // send to Normalizer
-															// Bolt
-				System.out.println("Structured Email Found !");
-				collector.emit("structuredMail", new Values(rawEmail));
 			} else {
-				// send to NLP Bolt
-				System.out.println("Email is unstructured !");
-				collector.emit("unstructuredMail", new Values(rawEmail));
+				if (this.checkAndProcessTemplate(rawEmail)) { // send to
+																// Normalizer
+					// Bolt
+					System.out.println("Structured Email Found !");
+					collector.emit("structuredMail", new Values(rawEmail));
+				} else {
+					// send to NLP Bolt
+					System.out.println("Email is unstructured !");
+					collector.emit("unstructuredMail", new Values(rawEmail));
+				}
 			}
-
 		}
 	}
 

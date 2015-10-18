@@ -18,12 +18,12 @@
 package org.incident.monitor;
 
 import org.incident.bolt.FilterTemplateBolt;
+import org.incident.bolt.NLPBolt;
 import org.incident.spout.FileBasedEmailSpout;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.topology.TopologyBuilder;
-import backtype.storm.utils.Utils;
 
 /**
  * This is a basic example of a Storm topology.
@@ -34,12 +34,10 @@ public class IncidentMonitorTopology {
 		TopologyBuilder builder = new TopologyBuilder();
 
 		builder.setSpout("FileBasedEmailSpout", new FileBasedEmailSpout(), 1);
-		builder.setBolt("FilterTemplateBolt", new FilterTemplateBolt(), 1).shuffleGrouping("FileBasedEmailSpout",
-				"rawemail");
+		builder.setBolt("FilterTemplateBolt", new FilterTemplateBolt(), 1).shuffleGrouping("FileBasedEmailSpout", "rawemail");
 		// builder.setBolt("SocialMediaEnrichBolt", new SocialMediaEnrichBolt(),
 		// 1).shuffleGrouping("FilterTemplateBolt");
-		// builder.setBolt("NLPBolt", new NLPBolt(),
-		// 1).shuffleGrouping("SocialMediaEnrichBolt");
+		 builder.setBolt("NLPBolt", new NLPBolt(), 1).shuffleGrouping("FilterTemplateBolt", "unstructuredMail");
 		// builder.setBolt("NormalizerBolt", new NormalizerBolt(),
 		// 1).shuffleGrouping("NLPBolt")
 		// .shuffleGrouping("FilterTemplateBolt");
@@ -47,7 +45,7 @@ public class IncidentMonitorTopology {
 		// 1).shuffleGrouping("NormalizerBolt");
 
 		Config conf = new Config();
-		conf.setDebug(true);
+		conf.setDebug(false);
 		conf.registerSerialization(Email.class);
 		conf.registerSerialization(Incident.class);
 
