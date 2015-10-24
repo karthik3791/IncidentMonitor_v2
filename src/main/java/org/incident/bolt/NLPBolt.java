@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.lang.StringUtils;
 import org.incident.monitor.Email;
 import org.incident.monitor.Incident;
 import org.incident.utils.TextTools;
@@ -44,7 +43,7 @@ public class NLPBolt extends BaseRichBolt {
 	public void execute(Tuple input) {
 		if (input.getSourceStreamId().equals("unstructuredMail")) {
 			Email unstructuredMail = (Email) input.getValue(0);
-			processEmail(unstructuredMail, this.pipeline);
+			// processEmailWithNLP(unstructuredMail, this.pipeline);
 
 			// System.out.println("Structured Email Found !");
 			// collector.emit("structuredNLPMail", new
@@ -62,13 +61,13 @@ public class NLPBolt extends BaseRichBolt {
 
 	}
 
-	private void processEmail(Email unstructuredMail, StanfordCoreNLP pipeline) {
-		String subject = unstructuredMail.getSubject(), body = unstructuredMail.getBody();
-		if (StringUtils.isNotBlank(subject))
-			processEmailWithNLP(subject, unstructuredMail.getMessageDate());
-		if (StringUtils.isNotBlank(body))
-			processEmailWithNLP(body);
-	}
+//	private void processEmail(Email unstructuredMail, StanfordCoreNLP pipeline) {
+//		String subject = unstructuredMail.getSubject(), body = unstructuredMail.getBody();
+//		if (StringUtils.isNotBlank(subject))
+//			processEmailWithNLP(subject, unstructuredMail.getMessageDate());
+//		if (StringUtils.isNotBlank(body))
+//			processEmailWithNLP(body);
+//	}
 
 	public List<Incident> processEmailWithNLP(Annotation document, StanfordCoreNLP pipeline) {
 
@@ -85,7 +84,7 @@ public class NLPBolt extends BaseRichBolt {
 			for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
 				String word = token.get(TextAnnotation.class);
 				String ne = token.get(NamedEntityTagAnnotation.class);
-				if (ne.equals("LOCATION")) {
+				if (ne.equals("DATE")) {
 					dateParts.add(word);
 				} else if (ne.equals("LOCATION")) {
 					locationParts.add(word);
