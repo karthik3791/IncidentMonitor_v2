@@ -116,7 +116,7 @@ public class DBManager implements Serializable {
 		return rs;
 	}
 
-	public ResultSet executeExactSql(String sql, Object... params) {
+	public DBQuery executeExactSql(String sql, Object... params) {
 		BasicDataSource datasource = (BasicDataSource) DBCPDataSourceFactory
 				.getDataSource(IncidentMonitorConstants.database_type);
 		Connection con = null;
@@ -142,12 +142,14 @@ public class DBManager implements Serializable {
 				}
 			}
 			rs = ps.executeQuery();
+			DBQuery dq = new DBQuery(con, rs, ps);
+			return dq;
 
 		} catch (SQLException e) {
 			e.printStackTrace();
 			rs = null;
 		}
-		return rs;
+		return null;
 	}
 
 }

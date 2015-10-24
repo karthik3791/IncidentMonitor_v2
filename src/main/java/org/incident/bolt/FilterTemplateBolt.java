@@ -29,7 +29,7 @@ public class FilterTemplateBolt extends BaseBasicBolt {
 		boolean filter_status = false;
 		String displayFrom = rawEmail.getDisplayFrom();
 		String subject = rawEmail.getSubject();
-		DBQuery dq = db.executeLikeSql_v2(IncidentMonitorConstants.check_filter_query, displayFrom, subject);
+		DBQuery dq = db.executeExactSql(IncidentMonitorConstants.check_filter_query, displayFrom, subject);
 		ResultSet rs = dq.getRs();
 		try {
 			filter_status = rs.next();
@@ -82,7 +82,7 @@ public class FilterTemplateBolt extends BaseBasicBolt {
 		boolean template_status = false;
 		String displayFrom = rawEmail.getDisplayFrom();
 		String subject = rawEmail.getSubject();
-		DBQuery dq = db.executeLikeSql_v2(IncidentMonitorConstants.check_template_query, displayFrom, subject);
+		DBQuery dq = db.executeExactSql(IncidentMonitorConstants.check_template_query, displayFrom, subject);
 		ResultSet rs = dq.getRs();
 		try {
 			template_status = rs.next();

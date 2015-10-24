@@ -11,6 +11,7 @@ org\incident\spout\FileBasedEmailSpout.class
 org\incident\monitor\Email.class
 org\incident\spout\FileBasedEmailProducer.class
 org\incident\utils\DBManager.class
+org\incident\utils\TextTools.class
 org\incident\monitor\Incident.class
 org\incident\bolt\IncidentPersistBolt.class
 org\incident\spout\EmailProducer.class
