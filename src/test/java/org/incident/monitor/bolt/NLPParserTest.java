@@ -30,9 +30,9 @@ public class NLPParserTest extends TestSuite {
 
 	@Test
 	public void testSimpleNameLocDate() {
-		List<Incident> i = createSimpleNameLocDate("Power outage in Singapore on 20 October 04033");
+		List<Incident> i = createSimpleNameLocDate("Power outage in Singapore on 20 October 2011");
 		assertEquals(1, i.size());
-		assertEquals("20 October 04033", i.get(0).getDate());
+		assertEquals("20 October 2011", i.get(0).getDate());
 	}
 
 	@Test
