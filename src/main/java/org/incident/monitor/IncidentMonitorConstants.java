@@ -12,4 +12,5 @@ public class IncidentMonitorConstants {
 	public static final String NLPLocationEntityIdentifier = "LOCATION";
 	public static final String NLPUnknownEntityIdentifier = "O";
 	public static final String NLPNounEntityIdentifier = "NN.*";
+	public static final String NLPNumberIdentifier = "NUMBER";
 }

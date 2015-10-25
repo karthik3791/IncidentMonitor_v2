@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.incident.monitor.Email;
 import org.incident.monitor.Incident;
 import org.incident.monitor.IncidentMonitorConstants;
+import org.incident.utils.NLPParsedOutput;
 import org.incident.utils.TextTools;
 
 import backtype.storm.task.OutputCollector;
@@ -45,20 +46,12 @@ public class NLPBolt extends BaseRichBolt {
 	public void execute(Tuple input) {
 		if (input.getSourceStreamId().equals("unstructuredMail")) {
 			Email unstructuredMail = (Email) input.getValue(0);
-			processEmail(unstructuredMail, this.pipeline);
-
-//			Annotation document = unstructuredMail.getDisplayFrom().startsWith("Ganesh")
-//					? new Annotation(unstructuredMail.getSubject()) : null;
-			//
-			// if (document != null) {
-//				List<Incident> incidents = processEmailWithNLP(document, this.pipeline);
-//				for (Incident incident : incidents) {
-//					unstructuredMail.addIncident(incident);
-//				}
-//			}
-
-			System.out.println("NLP Email Created !");
-			collector.emit("structuredNLPMail", new Values(unstructuredMail));
+			if (processEmail(unstructuredMail, this.pipeline)) {
+				System.out.println("NLP Email Created !");
+				collector.emit("structuredNLPMail", new Values(unstructuredMail));
+			} else {
+				System.out.println("No incidents Found");
+			}
 		}
 
 	}
@@ -67,19 +60,25 @@ public class NLPBolt extends BaseRichBolt {
 		declarer.declareStream("structuredNLPMail", new Fields("email"));
 	}
 
-	private void processEmail(Email unstructuredMail, StanfordCoreNLP pipeline) {
+	private boolean processEmail(Email unstructuredMail, StanfordCoreNLP pipeline) {
+		boolean status = false;
 		String subject = unstructuredMail.getSubject(), body = unstructuredMail.getBody();
 		List<Incident> combinedIncidents = new ArrayList<Incident>();
-		
+
 		if (StringUtils.isNotBlank(subject)) {
 			combinedIncidents.addAll(getIncidents(subject, pipeline, unstructuredMail.getMessageDate()));
 		}
 		if (StringUtils.isNotBlank(body))
-			combinedIncidents.addAll(getIncidents(subject, pipeline, ""));
+			combinedIncidents.addAll(getIncidents(body, pipeline, ""));
 
-		for (Incident i : combinedIncidents) {
-			unstructuredMail.addIncident(i);
+		if (combinedIncidents.size() > 0) {
+			status = true;
+			for (Incident i : combinedIncidents) {
+				unstructuredMail.addIncident(i);
+			}
 		}
+
+		return status;
 	}
 
 	/*
@@ -104,10 +103,11 @@ public class NLPBolt extends BaseRichBolt {
 	private Incident getIncident(CoreMap sentence, String defaultDate) {
 		String finalDate, finalLocation, finalName;
 
-		List<ArrayList<String>> incidentInfo = parseIncidentInfo(sentence);
-		ArrayList<String> dateParts = incidentInfo.get(0);
-		ArrayList<String> locationParts = incidentInfo.get(1);
-		ArrayList<String> nameParts = incidentInfo.get(2);
+		NLPParsedOutput nlpout = parseIncidentInfo(sentence);
+
+		List<String> dateParts = nlpout.getDateParts();
+		List<String> locationParts = nlpout.getLocationParts();
+		List<String> nameParts = nlpout.getNameParts();
 
 		// No incident created if no location found
 		if (locationParts.size() == 0) {
@@ -130,46 +130,40 @@ public class NLPBolt extends BaseRichBolt {
 		finalName = nameParts.size() > 0 ? TextTools.createStringFromList(nameParts)
 				: sentence.toShorterString("PartOfSpeech");
 
-		return new Incident(finalDate, finalLocation, finalName);
+		return new Incident(finalName, finalDate, finalLocation);
 	}
 
-	private List<ArrayList<String>> parseIncidentInfo(CoreMap sentence) {
-		List<String> dateParts = new ArrayList<String>(), locationParts = new ArrayList<String>(),
-				nameParts = new ArrayList<String>();
-
-		List<ArrayList<String>> incidentInfo = new ArrayList<ArrayList<String>>();
-
+	private NLPParsedOutput parseIncidentInfo(CoreMap sentence) {
+		NLPParsedOutput nlpout = new NLPParsedOutput();
 		String prevWord = "", prevNamedEntity = IncidentMonitorConstants.NLPUnknownEntityIdentifier;
 		for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
 			String currWord = token.get(TextAnnotation.class);
 			String currNamedEntity = token.get(NamedEntityTagAnnotation.class);
 			if (currNamedEntity.equals(IncidentMonitorConstants.NLPDateEntityIdentifier)) {
-				dateParts.add(currWord);
+				nlpout.addDatePart(currWord);
 			} else if (currNamedEntity.equals(IncidentMonitorConstants.NLPLocationEntityIdentifier)) {
 				// handle cases when location parts contains num that fall
 				// within date range
 				// eg. Fire at 2 Duxton Road
 				if (prevNamedEntity.equals(IncidentMonitorConstants.NLPDateEntityIdentifier)) {
-					dateParts.remove(prevWord);
-					locationParts.add(prevWord);
+					nlpout.removeDatePart(prevWord);
+					nlpout.addLocationPart(prevWord);
+				} else if (prevNamedEntity.equals(IncidentMonitorConstants.NLPNumberIdentifier)) {
+					nlpout.addLocationPart(prevWord);
 				}
-				locationParts.add(currWord);
+				nlpout.addLocationPart(currWord);
 			} else {
 				String pos = token.get(PartOfSpeechAnnotation.class);
 				if (currNamedEntity.equals(IncidentMonitorConstants.NLPUnknownEntityIdentifier)
 						&& pos.matches(IncidentMonitorConstants.NLPNounEntityIdentifier)) {
-					nameParts.add(currWord);
+					nlpout.addNamePart(currWord);
 				}
 			}
 			prevWord = currWord;
 			prevNamedEntity = currNamedEntity;
 		}
 
-		incidentInfo.add((ArrayList<String>) dateParts);
-		incidentInfo.add((ArrayList<String>) locationParts);
-		incidentInfo.add((ArrayList<String>) nameParts);
-
-		return incidentInfo;
+		return nlpout;
 	}
 
 	private List<CoreMap> getAnnotatedSentences(String content, StanfordCoreNLP pipeline) {

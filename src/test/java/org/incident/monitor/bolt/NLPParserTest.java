@@ -15,17 +15,23 @@ import junit.framework.TestSuite;
 
 public class NLPParserTest extends TestSuite {
 
-	private NLPBolt nlpTest = new NLPBolt();
-	Properties props = new Properties();
+	private NLPBolt nlpTest;
+	private Properties props;
 	private StanfordCoreNLP pipeline;
 
 	public NLPParserTest() {
+		props = new Properties();
 		props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
 		pipeline = new StanfordCoreNLP(props);
+		nlpTest = new NLPBolt();
 	}
 
 	public List<Incident> createSimpleNameLocDate(String testString) {
 		return nlpTest.processEmailWithNLP(new Annotation(testString), this.pipeline);
+	}
+
+	public List<Incident> checkGetIncidents(String testString, String defaultDate) {
+		return nlpTest.getIncidents(testString, this.pipeline, defaultDate);
 	}
 
 	@Test
@@ -39,6 +45,15 @@ public class NLPParserTest extends TestSuite {
 	public void testComplexNameLocDate() {
 		List<Incident> i = createSimpleNameLocDate(
 				"Power outage in Singapore on 20 October 2011. Fire reported at North Carolina today.");
+		assertEquals(2, i.size());
+		assertEquals("North Carolina", i.get(1).getLocation());
+	}
+
+	@Test
+	public void testSimpleNLPParsing() {
+		List<Incident> i = checkGetIncidents(
+				"Power outage in Singapore on 20 October 2011. Fire reported at North Carolina today.", "2015-01-01");
+
 		assertEquals(2, i.size());
 		assertEquals("North Carolina", i.get(1).getLocation());
 	}

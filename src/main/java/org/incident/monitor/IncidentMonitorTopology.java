@@ -34,10 +34,11 @@ public class IncidentMonitorTopology {
 		TopologyBuilder builder = new TopologyBuilder();
 
 		builder.setSpout("FileBasedEmailSpout", new FileBasedEmailSpout(), 1);
-		builder.setBolt("FilterTemplateBolt", new FilterTemplateBolt(), 1).shuffleGrouping("FileBasedEmailSpout", "rawemail");
+		builder.setBolt("FilterTemplateBolt", new FilterTemplateBolt(), 1).shuffleGrouping("FileBasedEmailSpout",
+				"rawemail");
 		// builder.setBolt("SocialMediaEnrichBolt", new SocialMediaEnrichBolt(),
 		// 1).shuffleGrouping("FilterTemplateBolt");
-		 builder.setBolt("NLPBolt", new NLPBolt(), 1).shuffleGrouping("FilterTemplateBolt", "unstructuredMail");
+		builder.setBolt("NLPBolt", new NLPBolt(), 1).shuffleGrouping("FilterTemplateBolt", "unstructuredMail");
 		// builder.setBolt("NormalizerBolt", new NormalizerBolt(),
 		// 1).shuffleGrouping("NLPBolt")
 		// .shuffleGrouping("FilterTemplateBolt");
