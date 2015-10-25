@@ -108,10 +108,16 @@ public class NLPBolt extends BaseRichBolt {
 		List<String> dateParts = nlpout.getDateParts();
 		List<String> locationParts = nlpout.getLocationParts();
 		List<String> nameParts = nlpout.getNameParts();
+		List<String> organizationParts = nlpout.getOrganizationParts();
 
 		// No incident created if no location found
 		if (locationParts.size() == 0) {
-			return null;
+			if (organizationParts.size() == 0) {
+				return null;
+			} else {
+				locationParts = organizationParts;
+				organizationParts.clear();
+			}
 		}
 
 		finalLocation = TextTools.createStringFromList(locationParts);
@@ -128,7 +134,8 @@ public class NLPBolt extends BaseRichBolt {
 
 		// Priority to parsed name, else use shortened sentence
 		finalName = nameParts.size() > 0 ? TextTools.createStringFromList(nameParts)
-				: sentence.toShorterString("PartOfSpeech");
+				: organizationParts.size() > 0 ? TextTools.createStringFromList(organizationParts)
+						: sentence.toShorterString("PartOfSpeech");
 
 		return new Incident(finalName, finalDate, finalLocation);
 	}
@@ -136,11 +143,21 @@ public class NLPBolt extends BaseRichBolt {
 	private NLPParsedOutput parseIncidentInfo(CoreMap sentence) {
 		NLPParsedOutput nlpout = new NLPParsedOutput();
 		String prevWord = "", prevNamedEntity = IncidentMonitorConstants.NLPUnknownEntityIdentifier;
+		boolean prevPrepositionflag = false;
 		for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
 			String currWord = token.get(TextAnnotation.class);
 			String currNamedEntity = token.get(NamedEntityTagAnnotation.class);
+
 			if (currNamedEntity.equals(IncidentMonitorConstants.NLPDateEntityIdentifier)) {
 				nlpout.addDatePart(currWord);
+			} else if (currNamedEntity.equals(IncidentMonitorConstants.NLPOrganizationEntityIdentifier)) {
+				if (prevPrepositionflag == true) {
+					nlpout.addLocationPart(currWord);
+				}
+				if (prevNamedEntity.equals(IncidentMonitorConstants.NLPOrganizationEntityIdentifier)
+						|| nlpout.getOrganizationParts().size() == 0)
+					nlpout.addOrganizationPart(currWord);
+
 			} else if (currNamedEntity.equals(IncidentMonitorConstants.NLPLocationEntityIdentifier)) {
 				// handle cases when location parts contains num that fall
 				// within date range
@@ -157,7 +174,8 @@ public class NLPBolt extends BaseRichBolt {
 				if (currNamedEntity.equals(IncidentMonitorConstants.NLPUnknownEntityIdentifier)
 						&& pos.matches(IncidentMonitorConstants.NLPNounEntityIdentifier)) {
 					nlpout.addNamePart(currWord);
-				}
+				} else if (pos.equals("IN"))
+					prevPrepositionflag = true;
 			}
 			prevWord = currWord;
 			prevNamedEntity = currNamedEntity;

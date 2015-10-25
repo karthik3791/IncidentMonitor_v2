@@ -7,11 +7,21 @@ public class NLPParsedOutput {
 	private List<String> dateParts;
 	private List<String> locationParts;
 	private List<String> nameParts;
+	private List<String> organizationParts;
+
+	public List<String> getOrganizationParts() {
+		return organizationParts;
+	}
+
+	public void addOrganizationPart(String organizationPart) {
+		this.organizationParts.add(organizationPart);
+	}
 
 	public NLPParsedOutput() {
 		dateParts = new ArrayList<String>();
 		locationParts = new ArrayList<String>();
 		nameParts = new ArrayList<String>();
+		organizationParts = new ArrayList<String>();
 	}
 
 	public List<String> getDateParts() {
