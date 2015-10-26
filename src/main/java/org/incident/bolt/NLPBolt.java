@@ -140,6 +140,22 @@ public class NLPBolt extends BaseRichBolt {
 		return new Incident(finalName, finalDate, finalLocation);
 	}
 
+/*
+Linguistic Rules for First Occurence of Organization.
+1. A sentence with Organization and no Location will treat Organization as Location.
+2. A sentence with Organization prceeded by a preposition will append the Organization to Location (irrespective of whether
+another Location is there or not).
+3. A sentence with Organization NOT preceeded by a preposition and with another Location
+will not include this Organization into the Location Part. We should add such an organization to the NamePart.
+
+Linguistic Rules for Location
+1. A number preceeding a Location will be added to the Location.
+2. MARCH Special case. Can be tagged as date but if not preceeded by a preposition then consider it part of NameEvent.
+
+Linguistic Rules for NAME Parts : -
+
+*/
+
 	private NLPParsedOutput parseIncidentInfo(CoreMap sentence) {
 		NLPParsedOutput nlpout = new NLPParsedOutput();
 		String prevWord = "", prevNamedEntity = IncidentMonitorConstants.NLPUnknownEntityIdentifier;
