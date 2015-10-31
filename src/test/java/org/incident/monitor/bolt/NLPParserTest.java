@@ -66,7 +66,7 @@ public class NLPParserTest extends TestSuite {
 	}
 
 	@Test
-	public void testSubjectWithNoDate() {
+	public void testSubjectWithNoDateWithCapitalizedWords() {
 		List<Incident> i = checkGetIncidents("Power Outage in Singapore", "2015-01-01");
 		assertEquals(1, i.size());
 		assertEquals("Singapore", i.get(0).getLocation());
@@ -75,12 +75,12 @@ public class NLPParserTest extends TestSuite {
 	}
 
 	@Test
-	public void testSubjectWithNoDate2() {
+	public void testSubjectWithNoDateWithOrganization() {
 		List<Incident> i = checkGetIncidents("Fire in Singapore at Police Department Headquarters.", "2015-01-01");
 		assertEquals(1, i.size());
-		assertEquals("Singapore", i.get(0).getLocation());
+		assertEquals("Singapore Police Department Headquarters", i.get(0).getLocation());
 		assertEquals("2015-01-01", i.get(0).getDate());
-		assertEquals("Power Outage", i.get(0).getName());
+		assertEquals("Fire", i.get(0).getName());
 	}
 
 	@Test
@@ -89,13 +89,13 @@ public class NLPParserTest extends TestSuite {
 		assertEquals(1, i.size());
 		assertEquals("Singapore", i.get(0).getLocation());
 		assertEquals("2015-01-01", i.get(0).getDate());
-		assertEquals("Flooded Singapore reported", i.get(0).getName());
+		assertEquals("flood report", i.get(0).getName());
 	}
 
 	@Test
 	public void testSubjectMultipleSentences() {
 		List<Incident> i = checkGetIncidents(
-				"Power outage in Singapore on 20 October 2011. Fire reported at North Carolina. Power outage today.",
+				"Power outage in Singapore on 20 October 2011. Wild fire reported at North Carolina. Power outage today.",
 				"2015-01-01");
 		assertEquals(2, i.size());
 		assertEquals("Singapore", i.get(0).getLocation());
@@ -104,7 +104,7 @@ public class NLPParserTest extends TestSuite {
 
 		assertEquals("North Carolina", i.get(1).getLocation());
 		assertEquals("2015-01-01", i.get(1).getDate());
-		assertEquals("Fire", i.get(1).getName());
+		assertEquals("Wild fire report", i.get(1).getName());
 	}
 
 	@Test
@@ -113,7 +113,7 @@ public class NLPParserTest extends TestSuite {
 		assertEquals(1, i.size());
 		assertEquals("30 Brooklyn Avenue America", i.get(0).getLocation());
 		assertEquals("2015-01-01", i.get(0).getDate());
-		assertEquals("Fire", i.get(0).getName());
+		assertEquals("Fire report", i.get(0).getName());
 	}
 
 	@Test
@@ -122,7 +122,7 @@ public class NLPParserTest extends TestSuite {
 		assertEquals(1, i.size());
 		assertEquals("300 Brooklyn Avenue America", i.get(0).getLocation());
 		assertEquals("2015-01-01", i.get(0).getDate());
-		assertEquals("Fire", i.get(0).getName());
+		assertEquals("Fire report", i.get(0).getName());
 	}
 
 	@Test
@@ -134,16 +134,13 @@ public class NLPParserTest extends TestSuite {
 	@Test
 	public void testBodyWithParagraph() {
 		List<Incident> i = checkGetIncidents(
-				"Earlier I was knowing that there are just three parties in the grand alliance: JD(U), "
-						+ "RJD and Congress Party but I’ve just come to know that a fourth partner too has joined "
-						+ "them, a tantrik (black magician)”, said PM Modi in a veiled reference to a video clipping "
-						+ "showing Bihar chief minister Nitish Kumar meeting with a tantrik went viral on social "
-						+ "media on Saturday.",
+				"As of April 13, 2015, nearly 35,000 cases of H1N1 have been reported across India with the death toll "
+						+ "mounting to 2,200 for this year alone. Some other details that we don't need to parse.",
 				"");
 		assertEquals(1, i.size());
-		assertEquals("Bihar", i.get(0).getLocation());
-		assertEquals("Saturday", i.get(0).getDate());
-
+		assertEquals("India", i.get(0).getLocation());
+		assertEquals("April 13 2015", i.get(0).getDate());
+		assertEquals("cases H1N1 report death toll mount", i.get(0).getName());
 	}
 
 }

@@ -1,55 +1,83 @@
 package org.incident.utils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class NLPParsedOutput {
-	private List<String> dateParts;
-	private List<String> locationParts;
-	private List<String> nameParts;
-	private List<String> organizationParts;
 
-	public List<String> getOrganizationParts() {
-		return organizationParts;
-	}
-
-	public void addOrganizationPart(String organizationPart) {
-		this.organizationParts.add(organizationPart);
-	}
+	private Map<Integer, String> dateMap;
+	private Map<Integer, String> organizationPreceededByPrepositionMap;
+	private Map<Integer, String> organizationNotPreceededByPrepositionMap;
+	private Map<Integer, String> locationMap;
+	private Map<Integer, String> nounMap;
+	private Map<Integer, String> verbMap;
+	private Map<Integer, String> adjectiveMap;
 
 	public NLPParsedOutput() {
-		dateParts = new ArrayList<String>();
-		locationParts = new ArrayList<String>();
-		nameParts = new ArrayList<String>();
-		organizationParts = new ArrayList<String>();
+		dateMap = new HashMap<Integer, String>();
+		organizationPreceededByPrepositionMap = new HashMap<Integer, String>();
+		organizationNotPreceededByPrepositionMap = new HashMap<Integer, String>();
+		locationMap = new HashMap<Integer, String>();
+		nounMap = new HashMap<Integer, String>();
+		verbMap = new HashMap<Integer, String>();
+		adjectiveMap = new HashMap<Integer, String>();
+
 	}
 
-	public List<String> getDateParts() {
-		return dateParts;
+	public void addDatePart(Integer wordpos, String datePart) {
+		this.dateMap.put(wordpos, datePart);
 	}
 
-	public void removeDatePart(String datePart) {
-		this.dateParts.remove(datePart);
+	public void addOrganizationPreceededByPreposition(Integer wordpos, String organizationPart) {
+		this.organizationPreceededByPrepositionMap.put(wordpos, organizationPart);
 	}
 
-	public void addDatePart(String datePart) {
-		this.dateParts.add(datePart);
+	public void addPlainOrganizationPart(Integer wordpos, String organizationPart) {
+		this.organizationNotPreceededByPrepositionMap.put(wordpos, organizationPart);
 	}
 
-	public List<String> getLocationParts() {
-		return locationParts;
+	public void addLocationMap(Integer wordpos, String locationPart) {
+		this.locationMap.put(wordpos, locationPart);
 	}
 
-	public void addLocationPart(String locationPart) {
-		this.locationParts.add(locationPart);
+	public void addNounPart(Integer wordpos, String nounPart) {
+		this.nounMap.put(wordpos, nounPart);
 	}
 
-	public List<String> getNameParts() {
-		return nameParts;
+	public void addVerbPart(Integer wordpos, String verbPart) {
+		this.verbMap.put(wordpos, verbPart);
 	}
 
-	public void addNamePart(String namePart) {
-		this.nameParts.add(namePart);
+	public void addAdjectivePart(Integer wordpos, String adjectivePart) {
+		this.adjectiveMap.put(wordpos, adjectivePart);
+	}
+
+	public Map<Integer, String> getDateMap() {
+		return dateMap;
+	}
+
+	public Map<Integer, String> getOrganizationPreceededByPrepositionMap() {
+		return organizationPreceededByPrepositionMap;
+	}
+
+	public Map<Integer, String> getOrganizationNotPreceededByPrepositionMap() {
+		return organizationNotPreceededByPrepositionMap;
+	}
+
+	public Map<Integer, String> getLocationMap() {
+		return locationMap;
+	}
+
+	public Map<Integer, String> getNounMap() {
+		return nounMap;
+	}
+
+	public Map<Integer, String> getVerbMap() {
+		return verbMap;
+	}
+
+	public Map<Integer, String> getAdjectiveMap() {
+		return adjectiveMap;
 	}
 
 }
