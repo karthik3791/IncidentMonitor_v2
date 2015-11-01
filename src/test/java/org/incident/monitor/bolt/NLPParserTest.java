@@ -137,4 +137,26 @@ public class NLPParserTest extends TestSuite {
 		assertIncident("India", "April 13 2015", "cases H1N1 report death toll mount", i.get(0));
 	}
 
+	@Test
+	public void testSentenceWithNoNoun() {
+		List<Incident> i = checkGetIncidents("BBC News reported that California flooded today.", "");
+		assertEquals(1, i.size());
+		assertIncident("California", "today", "BBC News report flood", i.get(0));
+	}
+
+	@Test
+	public void testSentenceWithNoNoun1() {
+		List<Incident> i = checkGetIncidents("BBC News predicts that California will experience rainfall on Saturday.",
+				"");
+		assertEquals(1, i.size());
+		assertIncident("California", "Saturday", "BBC News predict experience rainfall", i.get(0));
+	}
+
+	@Test
+	public void testSentenceWithNoNoun2() {
+		List<Incident> i = checkGetIncidents("Docklands, Australia – Protest Outside the Transurban Office – May 27",
+				"");
+		assertEquals(1, i.size());
+		assertIncident("Australia Transurban Office", "May 27", "Protest", i.get(0));
+	}
 }

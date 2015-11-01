@@ -20,7 +20,13 @@ public class IncidentMonitorConstants {
 	public static final String NLPNumberIdentifier = "NUMBER";
 	public static final String NLPUnknownEntityIdentifier = "O";
 	public static final String NLPMiscEntityIdentifier = "MISC";
+	public static final String NLPPersonEntityIdentifier = "PERSON";
 	public static final String NLPUnwantedIdentifiers = NLPDeterminantIdentifier + "|" + NLPModalIdentifier + "|,"
 			+ "|;";
+	public static final String NLPNEROtherIdentifiers = NLPUnknownEntityIdentifier + "|" + NLPMiscEntityIdentifier + "|"
+			+ NLPPersonEntityIdentifier;
 
+	public static final String NLPSubjectIdentifier = "nsubj.*";
+	public static final String NLPCCompId = "ccomp.*";
+	public static final String NLPXCompId = "xcomp.*";
 }

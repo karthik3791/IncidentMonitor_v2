@@ -1,7 +1,10 @@
 package org.incident.utils;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import edu.stanford.nlp.trees.TypedDependency;
 
 public class NLPParsedOutput {
 
@@ -13,6 +16,8 @@ public class NLPParsedOutput {
 	private Map<Integer, String> verbMap;
 	private Map<Integer, String> adjectiveMap;
 
+	private Collection<TypedDependency> typedDependencyList;
+
 	public NLPParsedOutput() {
 		dateMap = new HashMap<Integer, String>();
 		organizationPreceededByPrepositionMap = new HashMap<Integer, String>();
@@ -22,6 +27,14 @@ public class NLPParsedOutput {
 		verbMap = new HashMap<Integer, String>();
 		adjectiveMap = new HashMap<Integer, String>();
 
+	}
+
+	public Collection<TypedDependency> getTypedDependencyList() {
+		return typedDependencyList;
+	}
+
+	public void setTypedDependencyList(Collection<TypedDependency> typedDependencyList) {
+		this.typedDependencyList = typedDependencyList;
 	}
 
 	public void addDatePart(Integer wordpos, String datePart) {

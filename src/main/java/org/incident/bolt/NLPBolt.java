@@ -1,6 +1,7 @@
 package org.incident.bolt;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,13 @@ import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.trees.GrammaticalStructure;
+import edu.stanford.nlp.trees.GrammaticalStructureFactory;
+import edu.stanford.nlp.trees.PennTreebankLanguagePack;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.CoreMap;
 
 public class NLPBolt extends BaseRichBolt {
@@ -135,6 +143,71 @@ public class NLPBolt extends BaseRichBolt {
 
 	}
 
+	private String getEventName_V2(NLPParsedOutput output) {
+
+		Collection<TypedDependency> td = output.getTypedDependencyList();
+
+		// 1.Check if its a normal well constructed email with verbs.
+		List<String> nsubjVerbList = new ArrayList<String>();
+		String finalVerb, lemmaFinalVerb;
+		Object[] list = td.toArray();
+		TypedDependency typedDependency;
+		for (Object object : list) {
+			typedDependency = (TypedDependency) object;
+			if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPSubjectIdentifier)) {
+				if (typedDependency.gov().tag().matches(IncidentMonitorConstants.NLPVerbEntityIdentifier)) {
+					nsubjVerbList.add(typedDependency.gov().originalText());
+				}
+			}
+		}
+
+		if (nsubjVerbList.size() == 0 || nsubjVerbList.size() > 2) {
+			return getEventName(output);
+		} else if (nsubjVerbList.size() == 2) {
+			// Do a ccomp check.
+			for (Object object : list) {
+				typedDependency = (TypedDependency) object;
+				if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPCCompId)) {
+					if (typedDependency.gov().originalText().matches(nsubjVerbList.get(0))) {
+						finalVerb = nsubjVerbList.get(1);
+						lemmaFinalVerb = typedDependency.gov().lemma();
+					} else {
+						finalVerb = nsubjVerbList.get(0);
+						lemmaFinalVerb = typedDependency.gov().lemma();
+					}
+				}
+			}
+		}
+
+		for (Object object : list) {
+			typedDependency = (TypedDependency) object;
+			if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPXCompId)) {
+				finalVerb = typedDependency.dep().originalText();
+				lemmaFinalVerb = typedDependency.gov().lemma();
+			}
+		}
+
+		// Found Main Verb. Now look for Nouns and Adjectives.
+		String finalNoun = null, lemmaFinalVerb = null;
+		for (Object object : list) {
+			typedDependency = (TypedDependency) object;
+			if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPSubjectIdentifier)) {
+				finalNoun = typedDependency.dep().originalText();
+			}
+		}
+
+		Map<Integer, String> combinedLocationMap = new HashMap<Integer, String>();
+		combinedLocationMap.putAll(output.getAdjectiveMap());
+		combinedLocationMap.putAll(output.getVerbMap());
+		combinedLocationMap.putAll(output.getNounMap());
+		combinedLocationMap.putAll(output.getOrganizationNotPreceededByPrepositionMap());
+
+		String finalEventName = TextTools.getSortedValuesFromMap(combinedLocationMap);
+
+		return StringUtils.isBlank(finalEventName) ? null : finalEventName;
+
+	}
+
 	private Incident getIncident(CoreMap sentence, String defaultDate) {
 		String finalDate, finalLocation, finalEventName;
 
@@ -205,8 +278,10 @@ public class NLPBolt extends BaseRichBolt {
 				}
 				prevPrepositionflag = false;
 			} else if (currNamedEntity.equals(IncidentMonitorConstants.NLPNumberIdentifier)) {
-				if (prevNamedEntity.equals(IncidentMonitorConstants.NLPLocationEntityIdentifier))
+				if (prevNamedEntity.equals(IncidentMonitorConstants.NLPLocationEntityIdentifier)) {
 					nlpout.addLocationMap(wordpos, currWord);
+					currNamedEntity = IncidentMonitorConstants.NLPLocationEntityIdentifier;
+				}
 				prevPrepositionflag = false;
 			} else if (currNamedEntity.equals(IncidentMonitorConstants.NLPOrganizationEntityIdentifier)) {
 				if (prevPrepositionflag) {
@@ -216,8 +291,7 @@ public class NLPBolt extends BaseRichBolt {
 				} else {
 					nlpout.addPlainOrganizationPart(wordpos, currWord);
 				}
-			} else if (currNamedEntity.equals(IncidentMonitorConstants.NLPUnknownEntityIdentifier)
-					|| currNamedEntity.equals(IncidentMonitorConstants.NLPMiscEntityIdentifier)) {
+			} else if (currNamedEntity.matches(IncidentMonitorConstants.NLPNEROtherIdentifiers)) {
 				if (pos.matches(IncidentMonitorConstants.NLPNounEntityIdentifier)) {
 					nlpout.addNounPart(wordpos, currWord);
 				} else if (pos.matches(IncidentMonitorConstants.NLPVerbEntityIdentifier)) {
@@ -234,8 +308,18 @@ public class NLPBolt extends BaseRichBolt {
 			prevNamedEntity = currNamedEntity;
 		}
 
-		return nlpout;
+		return enrichParsedOutputWithDependencyTree(sentence, nlpout);
+	}
 
+	private NLPParsedOutput enrichParsedOutputWithDependencyTree(CoreMap sentence, NLPParsedOutput nlp) {
+		Tree tree = sentence.get(TreeAnnotation.class);
+		// Get dependency tree
+		TreebankLanguagePack tlp = new PennTreebankLanguagePack();
+		GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();
+		GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
+		Collection<TypedDependency> td = gs.typedDependenciesCollapsed();
+		nlp.setTypedDependencyList(td);
+		return nlp;
 	}
 
 	private List<CoreMap> getAnnotatedSentences(String content, StanfordCoreNLP pipeline) {
