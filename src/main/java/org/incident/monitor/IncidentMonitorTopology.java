@@ -19,6 +19,7 @@ package org.incident.monitor;
 
 import org.incident.bolt.FilterTemplateBolt;
 import org.incident.bolt.NLPBolt;
+import org.incident.bolt.NormalizerBolt;
 import org.incident.spout.FileBasedEmailSpout;
 
 import backtype.storm.Config;
@@ -39,9 +40,8 @@ public class IncidentMonitorTopology {
 		// builder.setBolt("SocialMediaEnrichBolt", new SocialMediaEnrichBolt(),
 		// 1).shuffleGrouping("FilterTemplateBolt");
 		builder.setBolt("NLPBolt", new NLPBolt(), 1).shuffleGrouping("FilterTemplateBolt", "unstructuredMail");
-		// builder.setBolt("NormalizerBolt", new NormalizerBolt(),
-		// 1).shuffleGrouping("NLPBolt")
-		// .shuffleGrouping("FilterTemplateBolt");
+		builder.setBolt("NormalizerBolt", new NormalizerBolt(), 1).shuffleGrouping("NLPBolt", "structuredNLPMail")
+				.shuffleGrouping("FilterTemplateBolt", "structuredMail");
 		// builder.setBolt("IncidentPersistBolt", new IncidentPersistBolt(),
 		// 1).shuffleGrouping("NormalizerBolt");
 

@@ -121,5 +121,10 @@
 			<artifactId>sqlite-jdbc</artifactId>
 			<version>3.8.11.2</version>
 		</dependency>
+		<dependency>
+			<groupId>com.joestelmach</groupId>
+			<artifactId>natty</artifactId>
+			<version>0.11</version>
+		</dependency>
 	</dependencies>
 </project>

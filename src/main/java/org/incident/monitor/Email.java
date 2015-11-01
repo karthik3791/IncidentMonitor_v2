@@ -16,6 +16,7 @@ public class Email implements Serializable {
 	private String[] recipientEmailList;
 	private String messageDate;
 	private Vector<Incident> incidents;
+	private Vector<NormalizedIncident> normalizedIncidents;
 
 	public String[] getRecipientAddress() {
 		return recipientEmailList;
@@ -27,6 +28,7 @@ public class Email implements Serializable {
 
 	public Email() {
 		incidents = new Vector<Incident>();
+		normalizedIncidents = new Vector<NormalizedIncident>();
 	}
 
 	@Override
@@ -111,4 +113,15 @@ public class Email implements Serializable {
 		this.incidents.add(i);
 	}
 
+	public void addNormalizedIncicent(NormalizedIncident i) {
+		this.normalizedIncidents.add(i);
+	}
+
+	public Vector<Incident> getIncidents() {
+		return this.incidents;
+	}
+
+	public Vector<NormalizedIncident> getNormalizedIncidents() {
+		return this.normalizedIncidents;
+	}
 }
