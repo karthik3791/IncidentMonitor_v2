@@ -49,6 +49,9 @@ public class NLPParsedOutput {
 		this.organizationNotPreceededByPrepositionMap.put(wordpos, organizationPart);
 	}
 
+	public void resetPlainOrganizationPart() {
+		this.organizationNotPreceededByPrepositionMap.clear();
+	}
 	public void addLocationMap(Integer wordpos, String locationPart) {
 		this.locationMap.put(wordpos, locationPart);
 	}

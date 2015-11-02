@@ -127,6 +127,9 @@ public class NLPBolt extends BaseRichBolt {
 		}
 
 		finalLocation = TextTools.getSortedValuesFromMap(output.getOrganizationNotPreceededByPrepositionMap());
+		// clear the map so that eventName does not copy same details when
+		// already used by Location
+		output.resetPlainOrganizationPart();
 		return StringUtils.isBlank(finalLocation) ? null : finalLocation;
 	}
 
@@ -143,70 +146,82 @@ public class NLPBolt extends BaseRichBolt {
 
 	}
 
-	private String getEventName_V2(NLPParsedOutput output) {
-
-		Collection<TypedDependency> td = output.getTypedDependencyList();
-
-		// 1.Check if its a normal well constructed email with verbs.
-		List<String> nsubjVerbList = new ArrayList<String>();
-		String finalVerb, lemmaFinalVerb;
-		Object[] list = td.toArray();
-		TypedDependency typedDependency;
-		for (Object object : list) {
-			typedDependency = (TypedDependency) object;
-			if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPSubjectIdentifier)) {
-				if (typedDependency.gov().tag().matches(IncidentMonitorConstants.NLPVerbEntityIdentifier)) {
-					nsubjVerbList.add(typedDependency.gov().originalText());
-				}
-			}
-		}
-
-		if (nsubjVerbList.size() == 0 || nsubjVerbList.size() > 2) {
-			return getEventName(output);
-		} else if (nsubjVerbList.size() == 2) {
-			// Do a ccomp check.
-			for (Object object : list) {
-				typedDependency = (TypedDependency) object;
-				if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPCCompId)) {
-					if (typedDependency.gov().originalText().matches(nsubjVerbList.get(0))) {
-						finalVerb = nsubjVerbList.get(1);
-						lemmaFinalVerb = typedDependency.gov().lemma();
-					} else {
-						finalVerb = nsubjVerbList.get(0);
-						lemmaFinalVerb = typedDependency.gov().lemma();
-					}
-				}
-			}
-		}
-
-		for (Object object : list) {
-			typedDependency = (TypedDependency) object;
-			if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPXCompId)) {
-				finalVerb = typedDependency.dep().originalText();
-				lemmaFinalVerb = typedDependency.gov().lemma();
-			}
-		}
-
-		// Found Main Verb. Now look for Nouns and Adjectives.
-		String finalNoun = null, lemmaFinalVerb = null;
-		for (Object object : list) {
-			typedDependency = (TypedDependency) object;
-			if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPSubjectIdentifier)) {
-				finalNoun = typedDependency.dep().originalText();
-			}
-		}
-
-		Map<Integer, String> combinedLocationMap = new HashMap<Integer, String>();
-		combinedLocationMap.putAll(output.getAdjectiveMap());
-		combinedLocationMap.putAll(output.getVerbMap());
-		combinedLocationMap.putAll(output.getNounMap());
-		combinedLocationMap.putAll(output.getOrganizationNotPreceededByPrepositionMap());
-
-		String finalEventName = TextTools.getSortedValuesFromMap(combinedLocationMap);
-
-		return StringUtils.isBlank(finalEventName) ? null : finalEventName;
-
-	}
+	// private String getEventName(NLPParsedOutput output) {
+	//
+	// Collection<TypedDependency> td = output.getTypedDependencyList();
+	//
+	// // 1.Check if its a normal well constructed email with verbs.
+	// List<String> nsubjVerbList = new ArrayList<String>();
+	// String finalVerb, lemmaFinalVerb;
+	// Object[] list = td.toArray();
+	// TypedDependency typedDependency;
+	// for (Object object : list) {
+	// typedDependency = (TypedDependency) object;
+	// if
+	// (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPSubjectIdentifier))
+	// {
+	// if
+	// (typedDependency.gov().tag().matches(IncidentMonitorConstants.NLPVerbEntityIdentifier))
+	// {
+	// nsubjVerbList.add(typedDependency.gov().originalText());
+	// }
+	// }
+	// }
+	//
+	// if (nsubjVerbList.size() == 0 || nsubjVerbList.size() > 2) {
+	// return getSimpleEventName(output);
+	// } else if (nsubjVerbList.size() == 2) {
+	// // Do a ccomp check.
+	// for (Object object : list) {
+	// typedDependency = (TypedDependency) object;
+	// if
+	// (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPCCompId))
+	// {
+	// if (typedDependency.gov().originalText().matches(nsubjVerbList.get(0))) {
+	// finalVerb = nsubjVerbList.get(1);
+	// lemmaFinalVerb = typedDependency.gov().lemma();
+	// } else {
+	// finalVerb = nsubjVerbList.get(0);
+	// lemmaFinalVerb = typedDependency.gov().lemma();
+	// }
+	// }
+	// }
+	// }
+	//
+	// for (Object object : list) {
+	// typedDependency = (TypedDependency) object;
+	// if
+	// (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPXCompId))
+	// {
+	// finalVerb = typedDependency.dep().originalText();
+	// lemmaFinalVerb = typedDependency.gov().lemma();
+	// }
+	// }
+	//
+	// // Found Main Verb. Now look for Nouns and Adjectives.
+	// String finalNoun = null, lemmaFinalVerb = null;
+	// for (Object object : list) {
+	// typedDependency = (TypedDependency) object;
+	// if
+	// (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPSubjectIdentifier))
+	// {
+	// finalNoun = typedDependency.dep().originalText();
+	// }
+	// }
+	//
+	// Map<Integer, String> combinedLocationMap = new HashMap<Integer,
+	// String>();
+	// combinedLocationMap.putAll(output.getAdjectiveMap());
+	// combinedLocationMap.putAll(output.getVerbMap());
+	// combinedLocationMap.putAll(output.getNounMap());
+	// combinedLocationMap.putAll(output.getOrganizationNotPreceededByPrepositionMap());
+	//
+	// String finalEventName =
+	// TextTools.getSortedValuesFromMap(combinedLocationMap);
+	//
+	// return StringUtils.isBlank(finalEventName) ? null : finalEventName;
+	//
+	// }
 
 	private Incident getIncident(CoreMap sentence, String defaultDate) {
 		String finalDate, finalLocation, finalEventName;
@@ -226,21 +241,24 @@ public class NLPBolt extends BaseRichBolt {
 	}
 
 	/*
-	 * Linguistic Rules for First Occurence of Organization. 1. A sentence with
-	 * Organization and no Location will treat Organization as Location. 2. A
-	 * sentence with Organization prceeded by a preposition will append the
+	 * Linguistic Rules for First occurrence of Organization. 
+	 * 1. A sentence with Organization and no Location will treat Organization as Location. 
+	 * 2. A sentence with Organization preceded by a preposition will append the
 	 * Organization to Location (irrespective of whether another Location is
-	 * there or not). 3. A sentence with Organization NOT preceeded by a
+	 * there or not). 
+	 * 3. A sentence with Organization NOT preceded by a
 	 * preposition and with another Location will not include this Organization
 	 * into the Location Part. We should add such an organization to the Event
 	 * Name Part.
 	 * 
-	 * Linguistic Rules for Location 1. A number preceeding a Location will be
-	 * added to the Location. 2. MARCH Special case. Can be tagged as date but
-	 * if not preceeded by a preposition then consider it part of NameEvent.
+	 * Linguistic Rules for Location 
+	 * 1. A number preceding a Location will be
+	 * added to the Location. 
+	 * 2. MARCH Special case. Can be tagged as date but
+	 * if not preceded by a preposition then consider it part of NameEvent.
 	 * 
 	 * Linguistic Rules for NAME Parts : - An adjective in the sentence + A noun
-	 * that is neither LOCATION nor DATE nor an ORGANIZATION preceeded by
+	 * that is neither LOCATION nor DATE nor an ORGANIZATION preceded by
 	 * preposition + lemmatized form of the verb in the sentence. *
 	 */
 
