@@ -21,8 +21,8 @@ public class IncidentMonitorConstants {
 	public static final String NLPUnknownEntityIdentifier = "O";
 	public static final String NLPMiscEntityIdentifier = "MISC";
 	public static final String NLPPersonEntityIdentifier = "PERSON";
-	public static final String NLPUnwantedIdentifiers = NLPDeterminantIdentifier + "|" + NLPModalIdentifier + "|,"
-			+ "|;";
+	public static final String NLPUnwantedIdentifiers = NLPDeterminantIdentifier + "|" + NLPModalIdentifier
+			+ "|,|;|:|(|)";
 	public static final String NLPNEROtherIdentifiers = NLPUnknownEntityIdentifier + "|" + NLPMiscEntityIdentifier + "|"
 			+ NLPPersonEntityIdentifier;
 

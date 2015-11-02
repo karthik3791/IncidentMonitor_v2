@@ -21,12 +21,14 @@ public class NLPDataDrivenTestsWithSpreadsheetTest extends NLPBoltTest {
 	private String input, defaultEmailDate;
 	private boolean validCase;
 	private Incident expectedIncident;
+	private static InputStream NLPParserTestSheet;
 
 	@SuppressWarnings("rawtypes")
 	@Parameters
 	public static Collection spreadsheetData() throws IOException {
-		InputStream spreadsheet = new FileInputStream("src/test/java/resources/NLPParserTestSheet.xls");
-		return new SpreadsheetData(spreadsheet).getData();
+		NLPParserTestSheet = new FileInputStream(NLPDataDrivenTestsWithSpreadsheetTest.class.getClassLoader()
+				.getResource("NLPParserTestSheet.xls").getFile());
+		return new SpreadsheetData(NLPParserTestSheet).getData();
 	}
 
 	public NLPDataDrivenTestsWithSpreadsheetTest(String input, String defaultEmailDate, String validCase,
@@ -36,7 +38,8 @@ public class NLPDataDrivenTestsWithSpreadsheetTest extends NLPBoltTest {
 		this.input = input;
 		this.defaultEmailDate = StringUtils.isBlank(defaultEmailDate) ? "" : defaultEmailDate;
 		this.validCase = validCase.equals("Y");
-		this.expectedIncident = this.validCase ? new Incident(eventName, eventDate, eventLocation) : null;
+		this.expectedIncident = this.validCase ? new Incident(eventName.trim(), eventDate.trim(), eventLocation.trim())
+				: null;
 	}
 
 	@Test
@@ -48,7 +51,5 @@ public class NLPDataDrivenTestsWithSpreadsheetTest extends NLPBoltTest {
 		} else {
 			assertEquals(0, actualIncident.size());
 		}
-
 	}
-
 }

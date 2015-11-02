@@ -7,12 +7,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -87,18 +84,16 @@ public class SpreadsheetData {
 		if (cell != null) {
 			if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
 				cellValue = cell.getRichStringCellValue().getString();
-				System.out.println(cellValue.toString());
 			} else if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
 				cellValue = getNumericCellValue(cell);
 			} else if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
 				cellValue = cell.getBooleanCellValue();
-			} else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
-				cellValue = evaluateCellFormula(workbook, cell);
 			}
 
 			return cellValue;
 		}
 
+		// Return some string for now
 		return " ";
 
 	}
@@ -111,21 +106,5 @@ public class SpreadsheetData {
 			cellValue = cell.getNumericCellValue();
 		}
 		return cellValue;
-	}
-
-	private Object evaluateCellFormula(final HSSFWorkbook workbook, final Cell cell) {
-		FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-		CellValue cellValue = evaluator.evaluate(cell);
-		// Object result = null;
-
-		// if (cellValue.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
-		// result = cellValue.getBooleanValue();
-		// } else if (cellValue.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-		// result = cellValue.getNumberValue();
-		// } else if (cellValue.getCellType() == Cell.CELL_TYPE_STRING) {
-		// result = cellValue.getStringValue();
-		// }
-
-		return StringUtils.isNotBlank(cellValue.getStringValue()) ? cellValue.getStringValue() : "";
 	}
 }

@@ -9,9 +9,8 @@ import org.incident.bolt.NLPBolt;
 import org.incident.monitor.Incident;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import junit.framework.TestSuite;
 
-public class NLPBoltTest extends TestSuite {
+public class NLPBoltTest {
 
 	private NLPBolt nlpTest;
 	private Properties props;
