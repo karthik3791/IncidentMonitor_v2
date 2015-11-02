@@ -22,11 +22,13 @@ public class IncidentMonitorConstants {
 	public static final String NLPMiscEntityIdentifier = "MISC";
 	public static final String NLPPersonEntityIdentifier = "PERSON";
 	public static final String NLPUnwantedIdentifiers = NLPDeterminantIdentifier + "|" + NLPModalIdentifier
-			+ "|,|;|:|(|)";
+			+ "|,|;|:|-LRB-|-RRB-";
 	public static final String NLPNEROtherIdentifiers = NLPUnknownEntityIdentifier + "|" + NLPMiscEntityIdentifier + "|"
 			+ NLPPersonEntityIdentifier;
 
 	public static final String NLPSubjectIdentifier = "nsubj.*";
 	public static final String NLPCCompId = "ccomp.*";
+	public static final String NounFilters = "FW|RE|FWD|ALERT|UPDATE";
+
 	public static final String NLPXCompId = "xcomp.*";
 }

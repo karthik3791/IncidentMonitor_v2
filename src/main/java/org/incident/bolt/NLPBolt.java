@@ -241,20 +241,17 @@ public class NLPBolt extends BaseRichBolt {
 	}
 
 	/*
-	 * Linguistic Rules for First occurrence of Organization. 
-	 * 1. A sentence with Organization and no Location will treat Organization as Location. 
-	 * 2. A sentence with Organization preceded by a preposition will append the
+	 * Linguistic Rules for First occurrence of Organization. 1. A sentence with
+	 * Organization and no Location will treat Organization as Location. 2. A
+	 * sentence with Organization preceded by a preposition will append the
 	 * Organization to Location (irrespective of whether another Location is
-	 * there or not). 
-	 * 3. A sentence with Organization NOT preceded by a
+	 * there or not). 3. A sentence with Organization NOT preceded by a
 	 * preposition and with another Location will not include this Organization
 	 * into the Location Part. We should add such an organization to the Event
 	 * Name Part.
 	 * 
-	 * Linguistic Rules for Location 
-	 * 1. A number preceding a Location will be
-	 * added to the Location. 
-	 * 2. MARCH Special case. Can be tagged as date but
+	 * Linguistic Rules for Location 1. A number preceding a Location will be
+	 * added to the Location. 2. MARCH Special case. Can be tagged as date but
 	 * if not preceded by a preposition then consider it part of NameEvent.
 	 * 
 	 * Linguistic Rules for NAME Parts : - An adjective in the sentence + A noun
@@ -283,6 +280,10 @@ public class NLPBolt extends BaseRichBolt {
 			}
 
 			if (currNamedEntity.equals(IncidentMonitorConstants.NLPDateEntityIdentifier)) {
+
+				// For March spl case
+				// If MARCH and preposition flag is false then NOUN else DATE
+
 				if (prevNamedEntity.equals(IncidentMonitorConstants.NLPDateEntityIdentifier)
 						|| nlpout.getDateMap().size() == 0)
 					nlpout.addDatePart(wordpos, currWord);
@@ -310,7 +311,8 @@ public class NLPBolt extends BaseRichBolt {
 					nlpout.addPlainOrganizationPart(wordpos, currWord);
 				}
 			} else if (currNamedEntity.matches(IncidentMonitorConstants.NLPNEROtherIdentifiers)) {
-				if (pos.matches(IncidentMonitorConstants.NLPNounEntityIdentifier)) {
+				if (pos.matches(IncidentMonitorConstants.NLPNounEntityIdentifier)
+						&& !currWord.toUpperCase().matches(IncidentMonitorConstants.NounFilters)) {
 					nlpout.addNounPart(wordpos, currWord);
 				} else if (pos.matches(IncidentMonitorConstants.NLPVerbEntityIdentifier)) {
 					String lemmaVerb = token.get(LemmaAnnotation.class);

@@ -132,4 +132,11 @@ public class NLPParserTest extends NLPBoltTest {
 		assertEquals(1, i.size());
 		assertIncident(new Incident("Docklands Protest", "May 27", "Australia Transurban Office"), i.get(0));
 	}
+
+	@Test
+	public void testSimpleBracketSentence() {
+		List<Incident> i = checkGetIncidents("FW: Power Outage in Canada (Vancouver) on May 27", "");
+		assertEquals(1, i.size());
+		assertIncident(new Incident("Power Outage", "May 27", "Canada Vancouver"), i.get(0));
+	}
 }
