@@ -30,5 +30,6 @@ public class IncidentMonitorConstants {
 	public static final String NLPCCompId = "ccomp.*";
 	public static final String NounFilters = "FW|RE|FWD|ALERT|UPDATE";
 
+	public static final String MarchConstant = "MARCH";
 	public static final String NLPXCompId = "xcomp.*";
 }

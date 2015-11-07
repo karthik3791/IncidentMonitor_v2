@@ -32,8 +32,7 @@ public class NLPDataDrivenTestsWithSpreadsheetTest extends NLPBoltTest {
 	}
 
 	public NLPDataDrivenTestsWithSpreadsheetTest(String input, String defaultEmailDate, String validCase,
-			String eventLocation,
-			String eventDate, String eventName) {
+			String eventLocation, String eventDate, String eventName) {
 		super();
 		this.input = input;
 		this.defaultEmailDate = StringUtils.isBlank(defaultEmailDate) ? "" : defaultEmailDate;

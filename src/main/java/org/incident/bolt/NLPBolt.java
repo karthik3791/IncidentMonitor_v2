@@ -262,7 +262,7 @@ public class NLPBolt extends BaseRichBolt {
 	private NLPParsedOutput getNLPParsedOutput(CoreMap sentence) {
 		NLPParsedOutput nlpout = new NLPParsedOutput();
 		String prevWord = "", prevNamedEntity = IncidentMonitorConstants.NLPUnknownEntityIdentifier;
-		boolean prevPrepositionflag = false;
+		boolean prevPrepositionflag = false, prevDeterminantFlag = false;
 		int wordpos = 0;
 		for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
 			wordpos++;
@@ -275,6 +275,10 @@ public class NLPBolt extends BaseRichBolt {
 				continue;
 			}
 
+			if (pos.equals(IncidentMonitorConstants.NLPDeterminantIdentifier)) {
+				prevDeterminantFlag = true;
+				continue;
+			}
 			if (pos.matches(IncidentMonitorConstants.NLPUnwantedIdentifiers)) {
 				continue;
 			}
@@ -283,34 +287,67 @@ public class NLPBolt extends BaseRichBolt {
 
 				// For March spl case
 				// If MARCH and preposition flag is false then NOUN else DATE
-
-				if (prevNamedEntity.equals(IncidentMonitorConstants.NLPDateEntityIdentifier)
+				if (currWord.toUpperCase().equals(IncidentMonitorConstants.MarchConstant)
+						&& prevDeterminantFlag == true) {
+					nlpout.addNounPart(wordpos, currWord);
+					currNamedEntity = IncidentMonitorConstants.NLPUnknownEntityIdentifier;
+				} else if (prevNamedEntity.equals(IncidentMonitorConstants.NLPDateEntityIdentifier)
 						|| nlpout.getDateMap().size() == 0)
 					nlpout.addDatePart(wordpos, currWord);
+				else
+					currNamedEntity = IncidentMonitorConstants.NLPUnknownEntityIdentifier;
+
 				prevPrepositionflag = false;
+				prevDeterminantFlag = false;
 			} else if (currNamedEntity.equals(IncidentMonitorConstants.NLPLocationEntityIdentifier)) {
-				if (prevNamedEntity.equals(IncidentMonitorConstants.NLPLocationEntityIdentifier)
-						|| nlpout.getLocationMap().size() == 0) {
-					if (prevNamedEntity.equals(IncidentMonitorConstants.NLPNumberIdentifier))
-						nlpout.addLocationMap(wordpos - 1, prevWord);
-					nlpout.addLocationMap(wordpos, currWord);
+
+				if (prevNamedEntity.equals(IncidentMonitorConstants.NLPNumberIdentifier))
+					nlpout.addLocationMap(wordpos - 1, prevWord);
+
+				if (prevNamedEntity.equals(IncidentMonitorConstants.NLPDateEntityIdentifier)) {
+					nlpout.getDateMap().remove(wordpos - 1);
+					nlpout.addLocationMap(wordpos - 1, prevWord);
 				}
+
+				nlpout.addLocationMap(wordpos, currWord);
+
 				prevPrepositionflag = false;
+				prevDeterminantFlag = false;
+
 			} else if (currNamedEntity.equals(IncidentMonitorConstants.NLPNumberIdentifier)) {
+
 				if (prevNamedEntity.equals(IncidentMonitorConstants.NLPLocationEntityIdentifier)) {
 					nlpout.addLocationMap(wordpos, currWord);
 					currNamedEntity = IncidentMonitorConstants.NLPLocationEntityIdentifier;
 				}
-				prevPrepositionflag = false;
+
+				// prevPrepositionflag = false;
+				prevDeterminantFlag = false;
+
 			} else if (currNamedEntity.equals(IncidentMonitorConstants.NLPOrganizationEntityIdentifier)) {
+
 				if (prevPrepositionflag) {
 					if (prevNamedEntity.equals(IncidentMonitorConstants.NLPOrganizationEntityIdentifier)
-							|| nlpout.getOrganizationPreceededByPrepositionMap().size() == 0)
+							|| nlpout.getOrganizationPreceededByPrepositionMap().size() == 0) {
+
+						if (prevNamedEntity.equals(IncidentMonitorConstants.NLPNumberIdentifier))
+							nlpout.addOrganizationPreceededByPreposition(wordpos - 1, prevWord);
+
 						nlpout.addOrganizationPreceededByPreposition(wordpos, currWord);
+					} else
+						currNamedEntity = IncidentMonitorConstants.NLPUnknownEntityIdentifier;
 				} else {
+
+					if (prevNamedEntity.equals(IncidentMonitorConstants.NLPNumberIdentifier))
+						nlpout.addPlainOrganizationPart(wordpos - 1, prevWord);
+
 					nlpout.addPlainOrganizationPart(wordpos, currWord);
 				}
+
+				prevDeterminantFlag = false;
+
 			} else if (currNamedEntity.matches(IncidentMonitorConstants.NLPNEROtherIdentifiers)) {
+
 				if (pos.matches(IncidentMonitorConstants.NLPNounEntityIdentifier)
 						&& !currWord.toUpperCase().matches(IncidentMonitorConstants.NounFilters)) {
 					nlpout.addNounPart(wordpos, currWord);
@@ -321,6 +358,7 @@ public class NLPBolt extends BaseRichBolt {
 					nlpout.addAdjectivePart(wordpos, currWord);
 				}
 				prevPrepositionflag = false;
+				prevDeterminantFlag = false;
 			} else {
 				continue;
 			}
@@ -344,7 +382,8 @@ public class NLPBolt extends BaseRichBolt {
 
 	private List<CoreMap> getAnnotatedSentences(String content, StanfordCoreNLP pipeline) {
 		try {
-			Annotation document = new Annotation(content);
+			String content_refine = content.replaceAll("[–]", ",");
+			Annotation document = new Annotation(content_refine);
 			pipeline.annotate(document);
 			return document.get(SentencesAnnotation.class);
 		} catch (Exception ex) {
