@@ -1,28 +1,51 @@
 package org.incident.bolt;
 
-import java.util.Map;
+import java.util.Date;
+import java.util.Vector;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
+import org.incident.monitor.Email;
+import org.incident.monitor.Location;
+import org.incident.monitor.NormalizedIncident;
+import org.incident.utils.DBManager;
+
+import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichBolt;
+import backtype.storm.topology.base.BaseBasicBolt;
 import backtype.storm.tuple.Tuple;
 
-public class IncidentPersistBolt extends BaseRichBolt {
+public class IncidentPersistBolt extends BaseBasicBolt {
 
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		// TODO Auto-generated method stub
+	private DBManager db;
+
+	public IncidentPersistBolt() {
+		db = DBManager.getDBInstance();
+	}
+
+	private void persistNormalizedIncident(NormalizedIncident nm) {
+
+		String eventName = nm.getName();
+		Location eventLoc = nm.getLocation();
+		Date eventDate = nm.getDate();
 
 	}
 
-	public void execute(Tuple input) {
-		// TODO Auto-generated method stub
+	private void persistEmail(Email rawEmail) {
+		Vector<NormalizedIncident> normalizedIncidents = rawEmail.getNormalizedIncidents();
+		for (int i = 0; i < normalizedIncidents.size(); i++) {
+			persistNormalizedIncident(normalizedIncidents.get(i));
+		}
 
+	}
+
+	public void execute(Tuple input, BasicOutputCollector collector) {
+		if (input.getSourceStreamId().equals("normalizedMail")) {
+			Email rawEmail = (Email) input.getValue(0);
+			persistEmail(rawEmail);
+		}
 	}
 
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		// TODO Auto-generated method stub
-
+		// Wont Emit anything.
 	}
 
 }

@@ -146,82 +146,79 @@ public class NLPBolt extends BaseRichBolt {
 
 	}
 
-	// private String getEventName(NLPParsedOutput output) {
-	//
-	// Collection<TypedDependency> td = output.getTypedDependencyList();
-	//
-	// // 1.Check if its a normal well constructed email with verbs.
-	// List<String> nsubjVerbList = new ArrayList<String>();
-	// String finalVerb, lemmaFinalVerb;
-	// Object[] list = td.toArray();
-	// TypedDependency typedDependency;
-	// for (Object object : list) {
-	// typedDependency = (TypedDependency) object;
-	// if
-	// (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPSubjectIdentifier))
-	// {
-	// if
-	// (typedDependency.gov().tag().matches(IncidentMonitorConstants.NLPVerbEntityIdentifier))
-	// {
-	// nsubjVerbList.add(typedDependency.gov().originalText());
-	// }
-	// }
-	// }
-	//
-	// if (nsubjVerbList.size() == 0 || nsubjVerbList.size() > 2) {
-	// return getSimpleEventName(output);
-	// } else if (nsubjVerbList.size() == 2) {
-	// // Do a ccomp check.
-	// for (Object object : list) {
-	// typedDependency = (TypedDependency) object;
-	// if
-	// (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPCCompId))
-	// {
-	// if (typedDependency.gov().originalText().matches(nsubjVerbList.get(0))) {
-	// finalVerb = nsubjVerbList.get(1);
-	// lemmaFinalVerb = typedDependency.gov().lemma();
-	// } else {
-	// finalVerb = nsubjVerbList.get(0);
-	// lemmaFinalVerb = typedDependency.gov().lemma();
-	// }
-	// }
-	// }
-	// }
-	//
-	// for (Object object : list) {
-	// typedDependency = (TypedDependency) object;
-	// if
-	// (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPXCompId))
-	// {
-	// finalVerb = typedDependency.dep().originalText();
-	// lemmaFinalVerb = typedDependency.gov().lemma();
-	// }
-	// }
-	//
-	// // Found Main Verb. Now look for Nouns and Adjectives.
-	// String finalNoun = null, lemmaFinalVerb = null;
-	// for (Object object : list) {
-	// typedDependency = (TypedDependency) object;
-	// if
-	// (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPSubjectIdentifier))
-	// {
-	// finalNoun = typedDependency.dep().originalText();
-	// }
-	// }
-	//
-	// Map<Integer, String> combinedLocationMap = new HashMap<Integer,
-	// String>();
-	// combinedLocationMap.putAll(output.getAdjectiveMap());
-	// combinedLocationMap.putAll(output.getVerbMap());
-	// combinedLocationMap.putAll(output.getNounMap());
-	// combinedLocationMap.putAll(output.getOrganizationNotPreceededByPrepositionMap());
-	//
-	// String finalEventName =
-	// TextTools.getSortedValuesFromMap(combinedLocationMap);
-	//
-	// return StringUtils.isBlank(finalEventName) ? null : finalEventName;
-	//
-	// }
+	private String getEventNamev2(NLPParsedOutput output) {
+
+		Collection<TypedDependency> td = output.getTypedDependencyList();
+
+		// 1.Check if its a normal well constructed email with verbs.
+		List<String> nsubjVerbList = new ArrayList<String>();
+		String finalVerb, lemmaFinalVerb;
+		Object[] list = td.toArray();
+		TypedDependency typedDependency;
+		for (Object object : list) {
+			typedDependency = (TypedDependency) object;
+			if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPSubjectIdentifier)) {
+				if (typedDependency.gov().tag().matches(IncidentMonitorConstants.NLPVerbEntityIdentifier)) {
+					nsubjVerbList.add(typedDependency.gov().originalText());
+				}
+			}
+		}
+
+		if (nsubjVerbList.size() == 0 || nsubjVerbList.size() > 2) {
+			return getEventName(output);
+		} else if (nsubjVerbList.size() == 2) {
+			// Do a ccomp check.
+			for (Object object : list) {
+				typedDependency = (TypedDependency) object;
+				if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPCCompId)) {
+					if (typedDependency.gov().originalText().matches(nsubjVerbList.get(0))) {
+						finalVerb = nsubjVerbList.get(1);
+						lemmaFinalVerb = typedDependency.dep().lemma();
+					} else {
+						finalVerb = nsubjVerbList.get(0);
+						lemmaFinalVerb = typedDependency.dep().lemma();
+					}
+				}
+			}
+		}
+
+		for (Object object : list) {
+			typedDependency = (TypedDependency) object;
+			if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPXCompId)) {
+				finalVerb = typedDependency.dep().originalText();
+				lemmaFinalVerb = typedDependency.dep().lemma();
+			}
+		}
+
+		// Found Main Verb. Now look for Nouns and Adjectives.
+		String finalNoun = null;
+		for (Object object : list) {
+			typedDependency = (TypedDependency) object;
+			if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPSubjectIdentifier)) {
+				finalNoun = typedDependency.dep().originalText();
+			}
+		}
+
+		String finaladjective = null;
+
+		for (Object object : list) {
+			typedDependency = (TypedDependency) object;
+			if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPAdjectiveMod)) {
+				finaladjective = typedDependency.dep().originalText();
+			}
+		}
+
+		Map<Integer, String> combinedLocationMap = new HashMap<Integer, String>();
+		combinedLocationMap.putAll(output.getAdjectiveMap());
+		combinedLocationMap.putAll(output.getVerbMap());
+		combinedLocationMap.putAll(output.getNounMap());
+		combinedLocationMap.putAll(output.getOrganizationNotPreceededByPrepositionMap());
+
+		String finalEventName = TextTools.getSortedValuesFromMap(combinedLocationMap);
+
+		return StringUtils.isBlank(finalEventName) ? null : finalEventName;
+
+	}
 
 	private Incident getIncident(CoreMap sentence, String defaultDate) {
 		String finalDate, finalLocation, finalEventName;

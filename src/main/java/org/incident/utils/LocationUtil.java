@@ -3,6 +3,7 @@ package org.incident.utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.incident.monitor.Location;
 
 import com.google.maps.GeoApiContext;
@@ -44,7 +45,10 @@ public class LocationUtil {
 			l.setFormattedAddress(results[i].formattedAddress);
 			AddressComponent[] addComponents = results[i].addressComponents;
 			setAddressComponents(l, addComponents);
-			locations.add(l);
+			// Checking for Country, Latitude and Longitude. These 3 are
+			// mandatory for a location.
+			if (StringUtils.isNotBlank(l.getCountry()) && l.getLatitude() != 0 && l.getLongitude() != 0)
+				locations.add(l);
 		}
 		return locations;
 	}
@@ -102,4 +106,3 @@ public class LocationUtil {
 		return (rad * 180 / Math.PI);
 	}
 }
-

@@ -27,6 +27,7 @@ public class IncidentMonitorConstants {
 			+ NLPPersonEntityIdentifier;
 
 	public static final String NLPSubjectIdentifier = "nsubj.*";
+	public static final String NLPAdjectiveMod = "amod.*";
 	public static final String NLPCCompId = "ccomp.*";
 	public static final String NounFilters = "FW|RE|FWD|ALERT|UPDATE";
 

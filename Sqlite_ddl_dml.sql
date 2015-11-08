@@ -54,4 +54,24 @@ AS
    INNER JOIN  INCIDENT_TEMPLATE_DETAILS eventdate ON template.template_id = eventdate.template_id AND eventdate.information_type ='EVENT_DATE'
    INNER JOIN  INCIDENT_TEMPLATE_DETAILS eventloc ON template.template_id = eventloc.template_id AND eventloc.information_type ='EVENT_LOCATION'
    INNER JOIN  INCIDENT_TEMPLATE_DETAILS eventname ON template.template_id = eventname.template_id AND eventname.information_type ='EVENT_NAME'
-   WHERE template.template_flag ='Y' and template.template_id IS NOT NULL
+   WHERE template.template_flag ='Y' and template.template_id IS NOT NULL;
+   
+CREATE TABLE INCIDENT_MASTER
+(
+  EVENT_NAME VARCHAR(255),
+  EVENT_DATE DATE,
+  COUNTRY VARCHAR(255),
+  LATITUDE DOUBLE,
+  LONGITUDE DOUBLE,
+  ROUTE_NAME VARCHAR(255),
+  LOCALITY VARCHAR(255),
+  NEIGHBOURHOOD VARCHAR(255),
+  ADMIN_AREA_LEVEL1 VARCHAR(255),
+  FORMATTED_ADDRESS VARCHAR(255),
+  PRIMARY KEY (EVENT_NAME, EVENT_DATE, COUNTRY, LATITUDE, LONGITUDE)  
+);
+
+ CREATE VIEW INCIDENTS_VIEW 
+ AS
+   SELECT *
+   FROM INCIDENT_MASTER ;
