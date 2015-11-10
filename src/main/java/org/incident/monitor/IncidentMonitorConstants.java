@@ -27,10 +27,16 @@ public class IncidentMonitorConstants {
 			+ NLPPersonEntityIdentifier;
 
 	public static final String NLPSubjectIdentifier = "nsubj.*";
-	public static final String NLPAdjectiveMod = "amod.*";
+	public static final String NLPAdjectiveMod = "amod";
+	public static final String NLPNounMod = "nmod";
+	public static final String NLPNounModOf = "nmod:of";
+	public static final String NLPCompoundMod = "compound";
 	public static final String NLPCCompId = "ccomp.*";
 	public static final String NounFilters = "FW|RE|FWD|ALERT|UPDATE";
 
 	public static final String MarchConstant = "MARCH";
 	public static final String NLPXCompId = "xcomp.*";
+	public static final String NLPDObj = "dobj.*";
+	public static final String beforeNounComponents = NLPAdjectiveMod + "|" + NLPNounMod + "|" + NLPCompoundMod + "|"
+			+ NLPNounModOf;
 }

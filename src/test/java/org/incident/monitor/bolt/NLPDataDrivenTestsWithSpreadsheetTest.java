@@ -42,7 +42,18 @@ public class NLPDataDrivenTestsWithSpreadsheetTest extends NLPBoltTest {
 	}
 
 	@Test
-	public void assertIncidentCreated() {
+	public void assertIncidentDateLocation() {
+		List<Incident> actualIncident = checkGetIncidents(input, defaultEmailDate);
+		if (validCase) {
+			assertEquals(1, actualIncident.size());
+			assertDateandLocation(expectedIncident, actualIncident.get(0));
+		} else {
+			assertEquals(0, actualIncident.size());
+		}
+	}
+
+	@Test
+	public void assertIncident() {
 		List<Incident> actualIncident = checkGetIncidents(input, defaultEmailDate);
 		if (validCase) {
 			assertEquals(1, actualIncident.size());

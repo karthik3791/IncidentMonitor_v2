@@ -56,13 +56,6 @@ public class NLPParserTest extends NLPBoltTest {
 	}
 
 	@Test
-	public void testSubjectWithNoDateNoEvent() {
-		List<Incident> i = checkGetIncidents("Flooded Singapore reported.", "2015-01-01");
-		assertEquals(1, i.size());
-		assertIncident(new Incident("flood report", "2015-01-01", "Singapore"), i.get(0));
-	}
-
-	@Test
 	public void testSubjectMultipleSentences() {
 		List<Incident> i = checkGetIncidents(
 				"Power outage in Singapore on 20 October 2011. Wild fire reported at North Carolina. Power outage today.",
@@ -107,14 +100,14 @@ public class NLPParserTest extends NLPBoltTest {
 						+ "mounting to 2,200 for this year alone. Some other details that we don't need to parse.",
 				"");
 		assertEquals(1, i.size());
-		assertIncident(new Incident("cases H1N1 report death toll mount", "April 13 2015", "India"), i.get(0));
+		assertIncident(new Incident("H1N1 cases report", "April 13 2015", "India"), i.get(0));
 	}
 
 	@Test
 	public void testSentenceWithNoNoun() {
 		List<Incident> i = checkGetIncidents("BBC News reported that California flooded today.", "");
 		assertEquals(1, i.size());
-		assertIncident(new Incident("BBC News report flood", "today", "California"), i.get(0));
+		assertIncident(new Incident("California flood", "today", "California"), i.get(0));
 	}
 
 	@Test
@@ -122,7 +115,7 @@ public class NLPParserTest extends NLPBoltTest {
 		List<Incident> i = checkGetIncidents("BBC News predicts that California will experience rainfall on Saturday.",
 				"");
 		assertEquals(1, i.size());
-		assertIncident(new Incident("BBC News predict experience rainfall", "Saturday", "California"), i.get(0));
+		assertIncident(new Incident("California experience rainfall", "Saturday", "California"), i.get(0));
 	}
 
 	@Test

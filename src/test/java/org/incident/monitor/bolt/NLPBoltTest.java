@@ -27,9 +27,14 @@ public class NLPBoltTest {
 		return nlpTest.getIncidents(testString, this.pipeline, defaultDate);
 	}
 
+	public void assertDateandLocation(Incident expectedIncident, Incident actualIncident) {
+		assertEquals(expectedIncident.getLocation(), actualIncident.getLocation());
+		assertEquals(expectedIncident.getDate(), actualIncident.getDate());
+	}
+
 	public void assertIncident(Incident expectedIncident, Incident actualIncident) {
 		assertEquals(expectedIncident.getLocation(), actualIncident.getLocation());
 		assertEquals(expectedIncident.getDate(), actualIncident.getDate());
-		// assertEquals(expectedIncident.getName(), actualIncident.getName());
+		assertEquals(expectedIncident.getName(), actualIncident.getName());
 	}
 }
