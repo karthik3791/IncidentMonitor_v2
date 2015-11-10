@@ -115,7 +115,7 @@ public class NLPParserTest extends NLPBoltTest {
 		List<Incident> i = checkGetIncidents("BBC News predicts that California will experience rainfall on Saturday.",
 				"");
 		assertEquals(1, i.size());
-		assertIncident(new Incident("California experience rainfall", "Saturday", "California"), i.get(0));
+		assertIncident(new Incident("California rainfall", "Saturday", "California"), i.get(0));
 	}
 
 	@Test
@@ -131,5 +131,15 @@ public class NLPParserTest extends NLPBoltTest {
 		List<Incident> i = checkGetIncidents("FW: Power Outage in Canada (Vancouver) on May 27", "");
 		assertEquals(1, i.size());
 		assertIncident(new Incident("Power Outage", "May 27", "Canada Vancouver"), i.get(0));
+	}
+
+	@Test
+	public void testOrganizationNumberLocation() {
+		List<Incident> i = checkGetIncidents(
+				"Robbery attempt reported at National Bank ,1430 Wilshire Boulevard Santa Monica, California West.",
+				"2015-01-01");
+		assertEquals(1, i.size());
+		assertDateandLocation(new Incident("Robbery attempt", "2015-01-01",
+				"National Bank 1430 Wilshire Boulevard Santa Monica California West"), i.get(0));
 	}
 }

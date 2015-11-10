@@ -223,8 +223,11 @@ public class NLPBolt extends BaseRichBolt {
 		List<String> compiledList = new ArrayList<String>();
 		compiledList.addAll(beforeNounComponents);
 		compiledList.add(finalNoun);
-		compiledList.add(lemmaFinalVerb);
-		compiledList.addAll(aftVerbComponents);
+
+		if (aftVerbComponents.size() == 0)
+			compiledList.add(lemmaFinalVerb);
+		else
+			compiledList.addAll(aftVerbComponents);
 
 		// Now construct the Event Name using all these components
 		return TextTools.createStringFromList(compiledList);
@@ -391,6 +394,7 @@ public class NLPBolt extends BaseRichBolt {
 	private List<CoreMap> getAnnotatedSentences(String content, StanfordCoreNLP pipeline) {
 		try {
 			String content_refine = content.replaceAll("[–]", ",");
+			content_refine = content_refine.replaceAll(",(\\d|\\w)", ", $1");
 			Annotation document = new Annotation(content_refine);
 			pipeline.annotate(document);
 			return document.get(SentencesAnnotation.class);
