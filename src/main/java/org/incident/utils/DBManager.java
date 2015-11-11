@@ -15,13 +15,9 @@ public class DBManager implements Serializable {
 
 	private static final long serialVersionUID = 4409175170759185357L;
 
-	// private BasicDataSource datasource;
-
 	private static DBManager db = new DBManager();
 
 	private DBManager() {
-		// datasource =
-		// (BasicDataSource)DBCPDataSourceFactory.getDataSource(IncidentMonitorConstants.database_type);
 	}
 
 	public static DBManager getDBInstance() {

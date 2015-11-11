@@ -15,6 +15,7 @@ import backtype.storm.tuple.Tuple;
 
 public class IncidentPersistBolt extends BaseBasicBolt {
 
+	private static final long serialVersionUID = -6760428944287625823L;
 	private DBManager db;
 
 	public IncidentPersistBolt() {

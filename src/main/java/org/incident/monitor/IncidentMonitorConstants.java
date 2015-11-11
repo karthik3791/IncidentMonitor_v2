@@ -2,12 +2,14 @@ package org.incident.monitor;
 
 public class IncidentMonitorConstants {
 
+	// Filter & Template
 	public static int num_db_connections = 3;
 	public static String database_type = "sqlite";
 	public static String check_filter_query = "select * from email_filters where (display_from ='n/a' or instr(upper(?),upper(display_from))<> 0) and (subject ='n/a' OR instr(upper(?),upper(subject)) <> 0 )";
 	public static String check_raw_filter_query = "select * from email_filters";
 	public static String check_template_query = "select * from email_templates where (display_from ='n/a' or instr(upper(?),upper(display_from))<> 0) and (subject ='n/a' OR instr(upper(?),upper(subject)) <> 0 )";
 
+	// NLP
 	public static final String NLPDateEntityIdentifier = "DATE";
 	public static final String NLPPrepositionIdentifier = "IN";
 	public static final String NLPDeterminantIdentifier = "DT";
@@ -39,4 +41,7 @@ public class IncidentMonitorConstants {
 	public static final String NLPDObj = "dobj.*";
 	public static final String beforeNounComponents = NLPAdjectiveMod + "|" + NLPNounMod + "|" + NLPCompoundMod + "|"
 			+ NLPNounModOf;
+
+	// Persist
+	public static String check_persisted_incidents_query = "select * from incidents_view where country = upper(?) and EVENT_DATE between date(?) and date(?)";
 }
