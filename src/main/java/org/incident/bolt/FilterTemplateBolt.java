@@ -19,6 +19,8 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 
 public class FilterTemplateBolt extends BaseBasicBolt {
+
+	private static final long serialVersionUID = 1L;
 	private DBManager db;
 
 	public FilterTemplateBolt() {
@@ -34,7 +36,6 @@ public class FilterTemplateBolt extends BaseBasicBolt {
 		try {
 			filter_status = rs.next();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			dq.close();

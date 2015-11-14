@@ -75,3 +75,6 @@ CREATE TABLE INCIDENT_MASTER
  AS
    SELECT *
    FROM INCIDENT_MASTER ;
+   
+ INSERT INTO INCIDENT_MASTER VALUES
+ ('?','?','?','?','?','?','?','?','?','?');

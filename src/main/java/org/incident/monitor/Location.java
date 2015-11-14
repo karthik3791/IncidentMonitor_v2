@@ -25,6 +25,18 @@ public class Location implements Serializable {
 		this.formattedAddress = "";
 	}
 
+	public Location(double longitude, double latitude, String routeName, String country, String locality,
+			String neighborhood, String adminAreaLevel1, String formattedAddress) {
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.routeName = routeName;
+		this.country = country;
+		this.locality = locality;
+		this.neighborhood = neighborhood;
+		this.adminAreaLevel1 = adminAreaLevel1;
+		this.formattedAddress = formattedAddress;
+	}
+
 	public double getLongitude() {
 		return longitude;
 	}

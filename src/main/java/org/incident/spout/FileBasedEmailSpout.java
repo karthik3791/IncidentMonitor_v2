@@ -15,9 +15,11 @@ import backtype.storm.utils.Utils;
 
 public class FileBasedEmailSpout extends BaseRichSpout {
 
+	private static final long serialVersionUID = 1L;
 	SpoutOutputCollector _collector;
 	LinkedBlockingQueue<Email> queue = null;
 
+	@SuppressWarnings("rawtypes")
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		queue = new LinkedBlockingQueue<Email>(100);
 		_collector = collector;
@@ -35,7 +37,6 @@ public class FileBasedEmailSpout extends BaseRichSpout {
 					try {
 						source.produce_email();
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}

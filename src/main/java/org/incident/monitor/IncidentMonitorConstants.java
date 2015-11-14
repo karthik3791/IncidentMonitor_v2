@@ -43,5 +43,7 @@ public class IncidentMonitorConstants {
 			+ NLPNounModOf;
 
 	// Persist
-	public static String check_persisted_incidents_query = "select * from incidents_view where country = upper(?) and EVENT_DATE between date(?) and date(?)";
+	public static final String check_persisted_incidents_query = "select * from incidents_view where country = upper(?) and EVENT_DATE between date(?) and date(?)";
+	public static final String update_incidents_table_statement = "insert into incident_master values ('?','?','?','?','?','?','?','?','?','?')";
+	public static final int numberOfDaysWindow = 1;
 }

@@ -20,7 +20,6 @@ public class DBTest {
 		ResultSet rs = dq.getRs();
 		try {
 			if (rs.next()) {
-				String display_from = rs.getString(1);
 				String subject = rs.getString(2);
 				assertEquals(subject, "n/a");
 			} else {
@@ -28,7 +27,6 @@ public class DBTest {
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			dq.close();
@@ -43,7 +41,6 @@ public class DBTest {
 		ResultSet rs = dq.getRs();
 		try {
 			if (rs.next()) {
-				String display_from = rs.getString(1);
 				String subject = rs.getString(2);
 				assertEquals(subject, "n/a");
 			} else {
@@ -51,7 +48,6 @@ public class DBTest {
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			dq.close();
@@ -66,7 +62,6 @@ public class DBTest {
 		ResultSet rs = dq.getRs();
 		try {
 			if (rs.next()) {
-				String display_from = rs.getString(1);
 				String subject = rs.getString(2);
 				assertEquals(subject, "n/a");
 			} else {
@@ -74,7 +69,6 @@ public class DBTest {
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			dq.close();

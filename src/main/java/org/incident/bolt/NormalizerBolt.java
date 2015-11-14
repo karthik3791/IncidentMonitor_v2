@@ -20,10 +20,12 @@ import backtype.storm.tuple.Values;
 
 public class NormalizerBolt extends BaseRichBolt {
 
+	private static final long serialVersionUID = 1L;
 	private OutputCollector collector;
 	private LocationUtil locUtil;
 	private DateUtil dateUtil;
 
+	@SuppressWarnings("rawtypes")
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
 		this.locUtil = new LocationUtil();
