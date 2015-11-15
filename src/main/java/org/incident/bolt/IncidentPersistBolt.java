@@ -32,10 +32,9 @@ public class IncidentPersistBolt extends BaseBasicBolt {
 		boolean doPersist = true;
 		// select possibly related incidents
 		// country, eventdate + or - 1 day
-		LocalDateTime endDateWindow = LocalDateTime.from(nm.getDate().toInstant())
-				.plusDays(IncidentMonitorConstants.numberOfDaysWindow),
-				startDateWindow = LocalDateTime.from(nm.getDate().toInstant())
-						.minusDays(IncidentMonitorConstants.numberOfDaysWindow);
+		LocalDateTime locDate = LocalDateTime.ofInstant(nm.getDate().toInstant(), ZoneId.systemDefault());
+		LocalDateTime endDateWindow = locDate.plusDays(IncidentMonitorConstants.numberOfDaysWindow),
+				startDateWindow = locDate.minusDays(IncidentMonitorConstants.numberOfDaysWindow);
 
 		DBQuery dq = db.executeExactSql(IncidentMonitorConstants.check_persisted_incidents_query,
 				nm.getLocation().getCountry(), Date.from(startDateWindow.atZone(ZoneId.systemDefault()).toInstant()),
@@ -62,15 +61,15 @@ public class IncidentPersistBolt extends BaseBasicBolt {
 		return doPersist;
 	}
 
-	private void persistNormalizedIncident(NormalizedIncident incident) {
+	public boolean persistNormalizedIncident(NormalizedIncident incident) {
 		String eventName = incident.getName();
 		Location eventLoc = incident.getLocation();
 		Date eventDate = incident.getDate();
 		// insert into incident master
-		db.updateExactSql(IncidentMonitorConstants.update_incidents_table_statement, eventName, eventDate.toString(),
-				eventLoc.getCountry(), eventLoc.getLatitude(), eventLoc.getLongitude(), eventLoc.getRouteName(),
-				eventLoc.getLocality(), eventLoc.getNeighborhood(), eventLoc.getAdminAreaLevel1(),
-				eventLoc.getFormattedAddress());
+		return db.updateExactSql(IncidentMonitorConstants.update_incidents_table_statement, eventName,
+				eventDate.toString(), eventLoc.getCountry(), eventLoc.getLatitude(), eventLoc.getLongitude(),
+				eventLoc.getRouteName(), eventLoc.getLocality(), eventLoc.getNeighborhood(),
+				eventLoc.getAdminAreaLevel1(), eventLoc.getFormattedAddress());
 	}
 
 	private void persistEmail(Email rawEmail) {

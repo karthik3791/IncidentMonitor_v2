@@ -2,6 +2,8 @@ package org.incident.monitor;
 
 import java.io.Serializable;
 
+import org.incident.utils.LocationUtil;
+
 public class Location implements Serializable {
 
 	private static final long serialVersionUID = 42L;
@@ -106,5 +108,12 @@ public class Location implements Serializable {
 		this.formattedAddress = formattedAddress;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		Location otherLocation = (Location) obj;
+		if (LocationUtil.getDistanceBetweenLocations(this,
+				otherLocation) < IncidentMonitorConstants.incidentsDistanceThreshold)
+			return true;
+		return false;
+	}
 }
-

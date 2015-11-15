@@ -3,7 +3,7 @@ package org.incident.monitor;
 public class IncidentMonitorConstants {
 
 	// Filter & Template
-	public static int num_db_connections = 3;
+	public static int num_db_connections = 10;
 	public static String database_type = "sqlite";
 	public static String check_filter_query = "select * from email_filters where (display_from ='n/a' or instr(upper(?),upper(display_from))<> 0) and (subject ='n/a' OR instr(upper(?),upper(subject)) <> 0 )";
 	public static String check_raw_filter_query = "select * from email_filters";
@@ -43,7 +43,9 @@ public class IncidentMonitorConstants {
 			+ NLPNounModOf;
 
 	// Persist
-	public static final String check_persisted_incidents_query = "select * from incidents_view where country = upper(?) and EVENT_DATE between date(?) and date(?)";
-	public static final String update_incidents_table_statement = "insert into incident_master values ('?','?','?','?','?','?','?','?','?','?')";
+	public static final String check_persisted_incidents_query = "select * from incidents_view where upper(country) = upper(?) and EVENT_DATE between ? and ?";
+	public static final String update_incidents_table_statement = "insert into incident_master values (?,?,?,?,?,?,?,?,?,?)";
+	public static String tear_down_incidents = "delete from incident_master";
 	public static final int numberOfDaysWindow = 1;
+	public static final int incidentsDistanceThreshold = 10; // In kilometers
 }

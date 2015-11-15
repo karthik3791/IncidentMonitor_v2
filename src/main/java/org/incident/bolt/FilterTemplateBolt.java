@@ -20,6 +20,7 @@ import backtype.storm.tuple.Values;
 
 public class FilterTemplateBolt extends BaseBasicBolt {
 
+	private static final String BODY = "BODY";
 	private static final long serialVersionUID = 1L;
 	private DBManager db;
 
@@ -34,6 +35,7 @@ public class FilterTemplateBolt extends BaseBasicBolt {
 		DBQuery dq = db.executeExactSql(IncidentMonitorConstants.check_filter_query, displayFrom, subject);
 		ResultSet rs = dq.getRs();
 		try {
+			// use the first matched filter
 			filter_status = rs.next();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -50,19 +52,19 @@ public class FilterTemplateBolt extends BaseBasicBolt {
 		Pattern name_pattern = Pattern.compile(name_regex);
 		Pattern location_pattern = Pattern.compile(location_regex);
 
-		// Process Date :
+		// process date
 		Matcher date_matcher, name_matcher, location_matcher;
-		if (date_component.equals("BODY")) {
+		if (date_component.equals(BODY)) {
 			date_matcher = date_pattern.matcher(rawEmail.getBody());
 		} else {
 			date_matcher = date_pattern.matcher(rawEmail.getSubject());
 		}
-		if (name_component.equals("BODY")) {
+		if (name_component.equals(BODY)) {
 			name_matcher = name_pattern.matcher(rawEmail.getBody());
 		} else {
 			name_matcher = name_pattern.matcher(rawEmail.getSubject());
 		}
-		if (location_component.equals("BODY")) {
+		if (location_component.equals(BODY)) {
 			location_matcher = location_pattern.matcher(rawEmail.getBody());
 		} else {
 			location_matcher = location_pattern.matcher(rawEmail.getSubject());
@@ -72,33 +74,24 @@ public class FilterTemplateBolt extends BaseBasicBolt {
 			return false;
 		}
 
-		// Enrich RawEmail Object
-		Incident i = new Incident(name_matcher.group(1), date_matcher.group(1), location_matcher.group(1));
-		rawEmail.addIncident(i);
+		// enrich RawEmail Object
+		rawEmail.addIncident(new Incident(name_matcher.group(1), date_matcher.group(1), location_matcher.group(1)));
 		return true;
-
 	}
 
 	public boolean checkAndProcessTemplate(Email rawEmail) {
 		boolean template_status = false;
-		String displayFrom = rawEmail.getDisplayFrom();
-		String subject = rawEmail.getSubject();
-		DBQuery dq = db.executeExactSql(IncidentMonitorConstants.check_template_query, displayFrom, subject);
+		DBQuery dq = db.executeExactSql(IncidentMonitorConstants.check_template_query, rawEmail.getDisplayFrom(),
+				rawEmail.getSubject());
 		ResultSet rs = dq.getRs();
 		try {
-			template_status = rs.next();
-			if (template_status == true) {
-				String date_regex = rs.getString("date_regex");
-				String date_component = rs.getString("date_component");
-				String location_regex = rs.getString("location_regex");
-				String location_component = rs.getString("location_component");
-				String name_regex = rs.getString("name_regex");
-				String name_component = rs.getString("name_component");
-				template_status = processTemplate(rawEmail, date_regex, date_component, location_regex,
-						location_component, name_regex, name_component);
+			// use the first matched template
+			if (rs.next()) {
+				template_status = processTemplate(rawEmail, rs.getString("date_regex"), rs.getString("date_component"),
+						rs.getString("location_regex"), rs.getString("location_component"), rs.getString("name_regex"),
+						rs.getString("name_component"));
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			dq.close();
@@ -113,9 +106,8 @@ public class FilterTemplateBolt extends BaseBasicBolt {
 				System.out.println("Email from " + rawEmail.getDisplayFrom() + " and subject " + rawEmail.getSubject()
 						+ " was filtered.");
 			} else {
-				if (this.checkAndProcessTemplate(rawEmail)) { // send to
-																// Normalizer
-					// Bolt
+				if (this.checkAndProcessTemplate(rawEmail)) {
+					// send to Normalizer Bolt directly
 					System.out.println("Structured Email Found !");
 					collector.emit("structuredMail", new Values(rawEmail));
 				} else {
@@ -131,5 +123,4 @@ public class FilterTemplateBolt extends BaseBasicBolt {
 		declarer.declareStream("structuredMail", new Fields("email"));
 		declarer.declareStream("unstructuredMail", new Fields("email"));
 	}
-
 }

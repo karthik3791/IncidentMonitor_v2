@@ -58,6 +58,7 @@ public class NLPBolt extends BaseRichBolt {
 			Email unstructuredMail = (Email) input.getValue(0);
 			if (processEmail(unstructuredMail, this.pipeline)) {
 				System.out.println("NLP Email Created !");
+				unstructuredMail.printIncidentsFound();
 				collector.emit("structuredNLPMail", new Values(unstructuredMail));
 			} else {
 				System.out.println("No incidents Found");

@@ -29,4 +29,12 @@ public class Incident implements Serializable {
 
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder str = new StringBuilder(1024);
+		str.append("Incident name: ").append(this.name).append("\n");
+		str.append("Incident date: ").append(this.date).append("\n");
+		str.append("Incident location: ").append(this.location).append("\n");
+		return str.toString();
+	}
 }

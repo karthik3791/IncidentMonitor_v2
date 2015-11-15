@@ -2,10 +2,10 @@ package org.incident.utils;
 
 import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.incident.monitor.IncidentMonitorConstants;
@@ -54,10 +54,15 @@ public class DBManager implements Serializable {
 			appendParams(ps, params);
 			if (ps.executeUpdate() > 0)
 				done = true;
-
 		} catch (SQLException e) {
 			e.printStackTrace();
-			// Log not successful in insertion
+		} finally {
+			try {
+				con.close();
+				ps.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 		return done;
 	}
@@ -87,7 +92,7 @@ public class DBManager implements Serializable {
 		int i = 1;
 		for (Object arg : params) {
 			if (arg instanceof Date) {
-				ps.setDate(i++, (Date) arg);
+				ps.setDate(i++, new java.sql.Date(((Date) arg).getTime()));
 			} else if (arg instanceof Integer) {
 				ps.setInt(i++, (Integer) arg);
 			} else if (arg instanceof Long) {

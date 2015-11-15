@@ -33,12 +33,12 @@ public class NormalizerBolt extends BaseRichBolt {
 	}
 
 	public void execute(Tuple input) {
-		if (input.getSourceGlobalStreamid().equals("structuredNLPMail")
+		if (input.getSourceStreamId().equals("structuredNLPMail")
 				|| input.getSourceStreamId().equals("structuredMail")) {
 			Email email = (Email) input.getValue(0);
 			normalizeEmail(email);
 			if (!email.getNormalizedIncidents().isEmpty()) {
-				System.out.println("Email is normalized successfully.");
+				// System.out.println("Email is normalized successfully.");
 				collector.emit("normalizedMail", new Values(email));
 			} else {
 				System.out.println("Cannot normalize email");
@@ -55,19 +55,19 @@ public class NormalizerBolt extends BaseRichBolt {
 			Incident incident = email.getIncidents().get(i);
 			String locationStr = incident.getLocation();
 			String dateStr = incident.getDate();
-			System.out.println(incident.getName());
-			System.out.println(locationStr);
-			System.out.println(dateStr);
+			// System.out.println(incident.getName());
+			// System.out.println(locationStr);
+			// System.out.println(dateStr);
 			try {
 				Location location = locUtil.getLocationFromString(locationStr).get(0);
 				Date date = dateUtil.parseDateFromString(dateStr).get(0);
 				if (location != null && date != null) {
 					NormalizedIncident normalized = new NormalizedIncident(incident.getName(), date, location);
 					email.addNormalizedIncicent(normalized);
-					System.out.println(incident.getName());
-					System.out.println(date.toString());
-					System.out.println(location.getFormattedAddress());
-					System.out.println();
+					// System.out.println(incident.getName());
+					// System.out.println(date.toString());
+					// System.out.println(location.getFormattedAddress());
+					// System.out.println();
 				}
 			} catch (Exception e) {
 				System.err.println("Cannot normalize incident: " + incident.getName() + ". " + e.getMessage());

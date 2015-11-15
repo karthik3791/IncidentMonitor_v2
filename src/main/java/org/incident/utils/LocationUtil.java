@@ -77,7 +77,7 @@ public class LocationUtil {
 		return Arrays.asList(types).contains(type);
 	}
 
-	public double getDistanceBetweenLocations(Location location1, Location location2) {
+	public static double getDistanceBetweenLocations(Location location1, Location location2) {
 		double lon1 = location1.getLongitude();
 		double lat1 = location1.getLatitude();
 		double lon2 = location2.getLongitude();
@@ -88,11 +88,12 @@ public class LocationUtil {
 
 	// calculation distance between longitude and latitude points. Source:
 	// http://www.geodatasource.com/developers/java
-	public double getDistanceByLongLat(double lon1, double lat1, double lon2, double lat2) {
+	public static double getDistanceByLongLat(double lon1, double lat1, double lon2, double lat2) {
 		double theta = lon1 - lon2;
 		double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2))
 				+ Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
-		dist = Math.acos(dist);
+		dist = dist > 1 ? 1 : (dist < -1 ? -1 : dist);
+		dist = Math.acos(Math.round(dist));
 		dist = rad2deg(dist);
 		return dist * 60 * 1.1515 * 1.609344; // return calculated distance in
 												// km

@@ -63,7 +63,9 @@ public class FileBasedEmailProducer implements EmailProducer {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					} finally {
-						String processed_mail_path = emailFile.replace("Emails", "Processed_Emails");
+						String tmp = emailFile.replace("Emails", "Processed_Emails");
+						String timestamp = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss").format(new java.util.Date());
+						String processed_mail_path = tmp.replaceFirst("\\.(msg|MSG)", timestamp.concat(".msg"));
 						msg_file.renameTo(new File(processed_mail_path));
 					}
 				}

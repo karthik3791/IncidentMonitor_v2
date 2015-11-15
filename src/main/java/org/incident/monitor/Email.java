@@ -124,4 +124,10 @@ public class Email implements Serializable {
 	public Vector<NormalizedIncident> getNormalizedIncidents() {
 		return this.normalizedIncidents;
 	}
+
+	public void printIncidentsFound() {
+		for (Incident i : incidents) {
+			System.out.println(i);
+		}
+	}
 }

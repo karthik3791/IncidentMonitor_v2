@@ -26,6 +26,7 @@ public class IncidentMonitorTopology {
 
 		Config conf = new Config();
 		conf.setDebug(false);
+		conf.setNumWorkers(1);
 		conf.registerSerialization(Email.class);
 		conf.registerSerialization(Incident.class);
 
