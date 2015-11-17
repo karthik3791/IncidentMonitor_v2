@@ -174,20 +174,27 @@ public class NLPBolt extends BaseRichBolt {
 		if (nsubjVerbList.size() == 0 || nsubjVerbList.size() > 2) {
 			return getEventNameForUnstructuredSentence(output);
 		} else if (nsubjVerbList.size() == 2) {
+			boolean ccompflag = false;
 			for (Object object : list) {
 				typedDependency = (TypedDependency) object;
 				if (typedDependency.reln().toString().matches(IncidentMonitorConstants.NLPCCompId)) {
 					if (typedDependency.gov().originalText().matches(nsubjVerbList.get(0))) {
 						finalVerb = nsubjVerbList.get(1);
 						lemmaFinalVerb = nsubjVerbLemmaList.get(1);
+						ccompflag = true;
 						break;
 					} else {
 						finalVerb = nsubjVerbList.get(0);
 						lemmaFinalVerb = nsubjVerbLemmaList.get(0);
+						ccompflag = true;
 						break;
 					}
 				}
 			}
+
+			if (ccompflag == false)
+				return getEventNameForUnstructuredSentence(output);
+
 		} else {
 			finalVerb = nsubjVerbList.get(0);
 			lemmaFinalVerb = nsubjVerbLemmaList.get(0);
@@ -226,7 +233,7 @@ public class NLPBolt extends BaseRichBolt {
 		compiledList.add(finalNoun);
 
 		if (aftVerbComponents.size() == 0)
-			compiledList.add(lemmaFinalVerb);
+			compiledList.add(finalVerb);
 		else
 			compiledList.addAll(aftVerbComponents);
 
@@ -249,7 +256,8 @@ public class NLPBolt extends BaseRichBolt {
 			return null;
 		}
 		finalEventName = getEventNameForStructuredSentence(nlpout);
-		return StringUtils.isBlank(finalEventName) ? null : new Incident(finalEventName, finalDate, finalLocation);
+		return StringUtils.isBlank(finalEventName) ? new Incident(sentence.toString(), finalDate, finalLocation)
+				: new Incident(finalEventName, finalDate, finalLocation);
 	}
 
 	/*
@@ -365,7 +373,7 @@ public class NLPBolt extends BaseRichBolt {
 					nlpout.addNounPart(wordpos, currWord);
 				} else if (pos.matches(IncidentMonitorConstants.NLPVerbEntityIdentifier)) {
 					String lemmaVerb = token.get(LemmaAnnotation.class);
-					nlpout.addVerbPart(wordpos, lemmaVerb);
+					nlpout.addVerbPart(wordpos, currWord);
 				} else if (pos.matches(IncidentMonitorConstants.NLPAdjectiveEntityIdentifier)) {
 					nlpout.addAdjectivePart(wordpos, currWord);
 				}

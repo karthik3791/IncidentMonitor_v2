@@ -2,9 +2,12 @@ package org.incident.bolt;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 import java.util.Vector;
 
 import org.incident.monitor.Email;
@@ -35,22 +38,31 @@ public class IncidentPersistBolt extends BaseBasicBolt {
 		LocalDateTime locDate = LocalDateTime.ofInstant(nm.getDate().toInstant(), ZoneId.systemDefault());
 		LocalDateTime endDateWindow = locDate.plusDays(IncidentMonitorConstants.numberOfDaysWindow),
 				startDateWindow = locDate.minusDays(IncidentMonitorConstants.numberOfDaysWindow);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(IncidentMonitorConstants.date_pattern);
+		DateFormat df = new SimpleDateFormat(IncidentMonitorConstants.date_pattern);
+		String startWindowString = startDateWindow.format(formatter);
+		String endWindowString = endDateWindow.format(formatter);
 
 		DBQuery dq = db.executeExactSql(IncidentMonitorConstants.check_persisted_incidents_query,
-				nm.getLocation().getCountry(), Date.from(startDateWindow.atZone(ZoneId.systemDefault()).toInstant()),
-				Date.from(endDateWindow.atZone(ZoneId.systemDefault()).toInstant()));
+				nm.getLocation().getCountry(), startWindowString, endWindowString);
 
 		ResultSet rs = dq.getRs();
 		try {
 			// for each incident persisted in db, check if incident is equal
 			while (rs.next()) {
-				NormalizedIncident dbIncident = new NormalizedIncident(rs.getString(1), rs.getDate(2),
-						new Location(rs.getDouble(3), rs.getDouble(4), rs.getString(5), rs.getString(6),
-								rs.getString(7), rs.getString(8), rs.getString(9), rs.getString(10)));
-				if (dbIncident.equals(nm)) {
-					doPersist = false;
-					break;
+				NormalizedIncident dbIncident;
+				try {
+					dbIncident = new NormalizedIncident(rs.getString(1), df.parse(rs.getString(2)),
+							new Location(rs.getDouble(5), rs.getDouble(4), rs.getString(6), rs.getString(3),
+									rs.getString(7), rs.getString(8), rs.getString(9), rs.getString(10)));
+					if (dbIncident.equals(nm)) {
+						doPersist = false;
+						break;
+					}
+				} catch (ParseException e) {
+					e.printStackTrace();
 				}
+
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -64,11 +76,11 @@ public class IncidentPersistBolt extends BaseBasicBolt {
 	public boolean persistNormalizedIncident(NormalizedIncident incident) {
 		String eventName = incident.getName();
 		Location eventLoc = incident.getLocation();
-		Date eventDate = incident.getDate();
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(IncidentMonitorConstants.date_pattern);
 		// insert into incident master
 		return db.updateExactSql(IncidentMonitorConstants.update_incidents_table_statement, eventName,
-				eventDate.toString(), eventLoc.getCountry(), eventLoc.getLatitude(), eventLoc.getLongitude(),
-				eventLoc.getRouteName(), eventLoc.getLocality(), eventLoc.getNeighborhood(),
+				simpleDateFormat.format(incident.getDate()), eventLoc.getCountry(), eventLoc.getLatitude(),
+				eventLoc.getLongitude(), eventLoc.getRouteName(), eventLoc.getLocality(), eventLoc.getNeighborhood(),
 				eventLoc.getAdminAreaLevel1(), eventLoc.getFormattedAddress());
 	}
 

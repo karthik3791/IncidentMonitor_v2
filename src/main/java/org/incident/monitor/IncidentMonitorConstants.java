@@ -48,4 +48,6 @@ public class IncidentMonitorConstants {
 	public static String tear_down_incidents = "delete from incident_master";
 	public static final int numberOfDaysWindow = 1;
 	public static final int incidentsDistanceThreshold = 10; // In kilometers
+	public static String date_pattern = "yyyy-MM-dd";
+
 }
