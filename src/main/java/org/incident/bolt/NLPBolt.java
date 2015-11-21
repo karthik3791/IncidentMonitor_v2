@@ -21,7 +21,6 @@ import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
-import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
@@ -372,7 +371,6 @@ public class NLPBolt extends BaseRichBolt {
 						&& !currWord.toUpperCase().matches(IncidentMonitorConstants.NounFilters)) {
 					nlpout.addNounPart(wordpos, currWord);
 				} else if (pos.matches(IncidentMonitorConstants.NLPVerbEntityIdentifier)) {
-					String lemmaVerb = token.get(LemmaAnnotation.class);
 					nlpout.addVerbPart(wordpos, currWord);
 				} else if (pos.matches(IncidentMonitorConstants.NLPAdjectiveEntityIdentifier)) {
 					nlpout.addAdjectivePart(wordpos, currWord);

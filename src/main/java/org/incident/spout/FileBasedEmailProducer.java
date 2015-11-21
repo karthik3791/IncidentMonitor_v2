@@ -3,12 +3,11 @@ package org.incident.spout;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hsmf.MAPIMessage;
 import org.apache.poi.hsmf.exceptions.ChunkNotFoundException;
 import org.incident.monitor.Email;
@@ -27,13 +26,21 @@ public class FileBasedEmailProducer implements EmailProducer {
 	public Email formEmail() throws InterruptedException {
 		Email em = new Email();
 		try {
-			em.setDisplayFrom(msg.getDisplayFrom().trim());
-			em.setDisplayTo(msg.getDisplayTo().trim());
-			em.setDisplayCC(msg.getDisplayCC().trim());
-			em.setDisplayBCC(msg.getDisplayBCC().trim());
-			em.setSubject(msg.getSubject().trim());
-			em.setBody(msg.getTextBody().trim());
-			em.setRecipientAddress(msg.getRecipientEmailAddressList());
+			String displayFrom = msg.getDisplayFrom();
+			if (StringUtils.isNotBlank(displayFrom))
+				em.setDisplayFrom(displayFrom.trim());
+
+			String displayTo = msg.getDisplayTo();
+			if (StringUtils.isNotBlank(displayTo))
+				em.setDisplayTo(displayTo.trim());
+
+			String textSubject = msg.getSubject();
+			if (StringUtils.isNotBlank(textSubject))
+				em.setSubject(textSubject.trim());
+
+			String textBody = msg.getTextBody();
+			if (StringUtils.isNotBlank(textBody))
+				em.setDisplayFrom(textBody.trim());
 
 			Calendar msgdate = msg.getMessageDate();
 			Date dt = msgdate.getTime();
@@ -56,11 +63,7 @@ public class FileBasedEmailProducer implements EmailProducer {
 						msg = new MAPIMessage(new BufferedInputStream(new FileInputStream(emailFile)));
 						Email em = formEmail();
 						listener.onEmail(em);
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					} catch (InterruptedException e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					} finally {
 						String tmp = emailFile.replace("Emails", "Processed_Emails");

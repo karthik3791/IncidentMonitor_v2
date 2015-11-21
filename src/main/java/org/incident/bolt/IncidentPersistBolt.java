@@ -1,9 +1,7 @@
 package org.incident.bolt;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -51,20 +49,16 @@ public class IncidentPersistBolt extends BaseBasicBolt {
 			// for each incident persisted in db, check if incident is equal
 			while (rs.next()) {
 				NormalizedIncident dbIncident;
-				try {
-					dbIncident = new NormalizedIncident(rs.getString(1), df.parse(rs.getString(2)),
-							new Location(rs.getDouble(5), rs.getDouble(4), rs.getString(6), rs.getString(3),
-									rs.getString(7), rs.getString(8), rs.getString(9), rs.getString(10)));
-					if (dbIncident.equals(nm)) {
-						doPersist = false;
-						break;
-					}
-				} catch (ParseException e) {
-					e.printStackTrace();
+				dbIncident = new NormalizedIncident(rs.getString(1), df.parse(rs.getString(2)),
+						new Location(rs.getDouble(5), rs.getDouble(4), rs.getString(6), rs.getString(3),
+								rs.getString(7), rs.getString(8), rs.getString(9), rs.getString(10)));
+				if (dbIncident.equals(nm)) {
+					doPersist = false;
+					break;
 				}
 
 			}
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			dq.close();
