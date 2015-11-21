@@ -2,6 +2,9 @@ package org.incident.monitor;
 
 public class IncidentMonitorConstants {
 
+	// Spout
+	public static String email_dir_path = "Emails";
+
 	// Filter & Template
 	public static int num_db_connections = 10;
 	public static String database_type = "sqlite";

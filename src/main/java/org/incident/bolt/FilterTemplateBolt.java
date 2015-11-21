@@ -52,30 +52,38 @@ public class FilterTemplateBolt extends BaseBasicBolt {
 		Pattern name_pattern = Pattern.compile(name_regex);
 		Pattern location_pattern = Pattern.compile(location_regex);
 
+		String email_body = rawEmail.getBody().replaceAll("(\\r|\\n)", "~");
+		email_body = email_body.replaceAll("~~~~ ~~~~", "~");
+		email_body = email_body.replaceAll("~~~~", " ");
+
 		// process date
 		Matcher date_matcher, name_matcher, location_matcher;
 		if (date_component.equals(BODY)) {
-			date_matcher = date_pattern.matcher(rawEmail.getBody());
+			date_matcher = date_pattern.matcher(email_body);
 		} else {
 			date_matcher = date_pattern.matcher(rawEmail.getSubject());
 		}
 		if (name_component.equals(BODY)) {
-			name_matcher = name_pattern.matcher(rawEmail.getBody());
+			name_matcher = name_pattern.matcher(email_body);
 		} else {
 			name_matcher = name_pattern.matcher(rawEmail.getSubject());
 		}
 		if (location_component.equals(BODY)) {
-			location_matcher = location_pattern.matcher(rawEmail.getBody());
+			location_matcher = location_pattern.matcher(email_body);
 		} else {
 			location_matcher = location_pattern.matcher(rawEmail.getSubject());
 		}
 
-		if (date_matcher.find() == false || name_matcher.find() == false || location_matcher.find() == false) {
+		if (!date_matcher.find() || !name_matcher.find() || !location_matcher.find()) {
 			return false;
 		}
 
+		String name = name_matcher.group(1);
+		String location = location_matcher.group(1);
+		String date = date_matcher.group(1);
+
 		// enrich RawEmail Object
-		rawEmail.addIncident(new Incident(name_matcher.group(1), date_matcher.group(1), location_matcher.group(1)));
+		rawEmail.addIncident(new Incident(name, date, location));
 		return true;
 	}
 

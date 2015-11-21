@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hsmf.MAPIMessage;
 import org.apache.poi.hsmf.exceptions.ChunkNotFoundException;
 import org.incident.monitor.Email;
+import org.incident.monitor.IncidentMonitorConstants;
 
 public class FileBasedEmailProducer implements EmailProducer {
 	private String emailFile;
@@ -20,7 +21,7 @@ public class FileBasedEmailProducer implements EmailProducer {
 
 	public FileBasedEmailProducer(EmailListener listener) {
 		this.listener = listener;
-		mail_dir = new File(getClass().getClassLoader().getResource("Emails").getFile());
+		mail_dir = new File(IncidentMonitorConstants.email_dir_path);
 	}
 
 	public Email formEmail() throws InterruptedException {
@@ -39,8 +40,9 @@ public class FileBasedEmailProducer implements EmailProducer {
 				em.setSubject(textSubject.trim());
 
 			String textBody = msg.getTextBody();
+
 			if (StringUtils.isNotBlank(textBody))
-				em.setDisplayFrom(textBody.trim());
+				em.setBody(textBody.trim());
 
 			Calendar msgdate = msg.getMessageDate();
 			Date dt = msgdate.getTime();

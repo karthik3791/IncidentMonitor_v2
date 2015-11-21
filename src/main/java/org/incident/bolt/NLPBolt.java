@@ -402,6 +402,7 @@ public class NLPBolt extends BaseRichBolt {
 		try {
 			String content_refine = content.replaceAll("[–]", ",");
 			content_refine = content_refine.replaceAll(",(\\d|\\w)", ", $1");
+			content_refine = content_refine.replaceAll("<.*>", "");
 			Annotation document = new Annotation(content_refine);
 			pipeline.annotate(document);
 			return document.get(SentencesAnnotation.class);

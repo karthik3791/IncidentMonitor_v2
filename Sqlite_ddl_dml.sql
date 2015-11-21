@@ -28,11 +28,11 @@ CREATE TABLE INCIDENT_FILTER_TEMPLATE
  (1,'Ganeshkarthik','N','Y');
  
  INSERT INTO INCIDENT_TEMPLATE_DETAILS VALUES
- (1,'BODY','EVENT_NAME','Incident Name : (.*)')
+ (1,'BODY','EVENT_NAME','Incident Name : ([^~]*)~')
   INSERT INTO INCIDENT_TEMPLATE_DETAILS VALUES
- (1,'BODY','EVENT_DATE','Incident Date : (.*)')
+ (1,'BODY','EVENT_DATE','Incident Date : ([^~]*)~')
   INSERT INTO INCIDENT_TEMPLATE_DETAILS VALUES
- (1,'BODY','EVENT_LOCATION','Incident Location : (.*)')
+ (1,'BODY','EVENT_LOCATION','Incident Location : ([^~]*)~')
  
  CREATE VIEW EMAIL_FILTERS 
  AS
