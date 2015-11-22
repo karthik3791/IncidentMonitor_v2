@@ -70,15 +70,17 @@ public class NLPBolt extends BaseRichBolt {
 		declarer.declareStream("structuredNLPMail", new Fields("email"));
 	}
 
-	private boolean processEmail(Email unstructuredMail, StanfordCoreNLP pipeline) {
+	public boolean processEmail(Email unstructuredMail, StanfordCoreNLP pipeline) {
 		boolean status = false;
 		String subject = unstructuredMail.getSubject(), body = unstructuredMail.getBody();
 		List<Incident> combinedIncidents = new ArrayList<Incident>();
 
-		if (StringUtils.isNotBlank(subject))
+		if (StringUtils.isNotBlank(subject)) {
 			combinedIncidents.addAll(getIncidents(subject, pipeline, unstructuredMail.getMessageDate()));
+		}
 
-		if (StringUtils.isNotBlank(body))
+		// If subject contained incident, don't process body
+		if (combinedIncidents.size() == 0 && StringUtils.isNotBlank(body))
 			combinedIncidents.addAll(getIncidents(body, pipeline, ""));
 
 		if (combinedIncidents.size() > 0) {

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.incident.bolt.NLPBolt;
+import org.incident.monitor.Email;
 import org.incident.monitor.Incident;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -27,6 +28,9 @@ public class NLPBoltTest {
 		return nlpTest.getIncidents(testString, this.pipeline, defaultDate);
 	}
 
+	public boolean checkProcessEmail(Email unstructuredMail) {
+		return nlpTest.processEmail(unstructuredMail, this.pipeline);
+	}
 	public void assertDateandLocation(Incident expectedIncident, Incident actualIncident) {
 		assertEquals(expectedIncident.getLocation(), actualIncident.getLocation());
 		assertEquals(expectedIncident.getDate(), actualIncident.getDate());

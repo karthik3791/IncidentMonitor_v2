@@ -1,9 +1,13 @@
 package org.incident.monitor.bolt;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
+import org.incident.monitor.Email;
 import org.incident.monitor.Incident;
 import org.junit.Test;
 
@@ -22,7 +26,7 @@ public class NLPParserTest extends NLPBoltTest {
 				"Power outage in Singapore on 20 October 2011. Fire reported at North Carolina today.", "");
 		assertEquals(2, i.size());
 		assertIncident(new Incident("Power outage", "20 October 2011", "Singapore"), i.get(0));
-		assertIncident(new Incident("Fire report", "today", "North Carolina"), i.get(1));
+		assertIncident(new Incident("Fire reported", "today", "North Carolina"), i.get(1));
 	}
 
 	@Test
@@ -63,28 +67,28 @@ public class NLPParserTest extends NLPBoltTest {
 		// assert that last sentence is not used
 		assertEquals(2, i.size());
 		assertIncident(new Incident("Power outage", "20 October 2011", "Singapore"), i.get(0));
-		assertIncident(new Incident("Wild fire report", "2015-01-01", "North Carolina"), i.get(1));
+		assertIncident(new Incident("Wild fire reported", "2015-01-01", "North Carolina"), i.get(1));
 	}
 
 	@Test
 	public void testSubjectWithDateBeforeLocation() {
 		List<Incident> i = checkGetIncidents("Fire reported in 30 Brooklyn Avenue, America.", "2015-01-01");
 		assertEquals(1, i.size());
-		assertIncident(new Incident("Fire report", "2015-01-01", "30 Brooklyn Avenue America"), i.get(0));
+		assertIncident(new Incident("Fire reported", "2015-01-01", "30 Brooklyn Avenue America"), i.get(0));
 	}
 
 	@Test
 	public void testSubjectWithNumberBeforeLocation() {
 		List<Incident> i = checkGetIncidents("Fire reported in 300 Brooklyn Avenue, America.", "2015-01-01");
 		assertEquals(1, i.size());
-		assertIncident(new Incident("Fire report", "2015-01-01", "300 Brooklyn Avenue America"), i.get(0));
+		assertIncident(new Incident("Fire reported", "2015-01-01", "300 Brooklyn Avenue America"), i.get(0));
 	}
 
 	@Test
 	public void testSubjectWithNumberAfterLocation() {
 		List<Incident> i = checkGetIncidents("Fire reported in 300 Brooklyn Avenue 209332, America.", "2015-01-01");
 		assertEquals(1, i.size());
-		assertIncident(new Incident("Fire report", "2015-01-01", "300 Brooklyn Avenue 209332 America"), i.get(0));
+		assertIncident(new Incident("Fire reported", "2015-01-01", "300 Brooklyn Avenue 209332 America"), i.get(0));
 	}
 
 	@Test
@@ -100,14 +104,14 @@ public class NLPParserTest extends NLPBoltTest {
 						+ "mounting to 2,200 for this year alone. Some other details that we don't need to parse.",
 				"");
 		assertEquals(1, i.size());
-		assertIncident(new Incident("H1N1 cases report", "April 13 2015", "India"), i.get(0));
+		assertIncident(new Incident("H1N1 cases reported", "April 13 2015", "India"), i.get(0));
 	}
 
 	@Test
 	public void testSentenceWithNoNoun() {
 		List<Incident> i = checkGetIncidents("BBC News reported that California flooded today.", "");
 		assertEquals(1, i.size());
-		assertIncident(new Incident("California flood", "today", "California"), i.get(0));
+		assertIncident(new Incident("California flooded", "today", "California"), i.get(0));
 	}
 
 	@Test
@@ -141,5 +145,45 @@ public class NLPParserTest extends NLPBoltTest {
 		assertEquals(1, i.size());
 		assertDateandLocation(new Incident("Robbery attempt", "2015-01-01",
 				"National Bank 1430 Wilshire Boulevard Santa Monica California West"), i.get(0));
+	}
+
+	@Test
+	public void testOnlySubjectUsedIfIncidentFound() {
+		Email em = new Email();
+
+		em.setSubject("Fire at California today");
+		em.setBody("Actually there was a fire at China today!");
+
+		Date dt = new Date();
+		SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+		em.setMessageDate(format1.format(dt));
+
+		if (checkProcessEmail(em)) {
+			List<Incident> i = em.getIncidents();
+			assertEquals(1, i.size());
+			assertIncident(new Incident("Fire", "today", "California"), i.get(0));
+		} else {
+			fail("No incidents extracted!");
+		}
+	}
+
+	@Test
+	public void testBodyUsedIfIncidentNotFoundInSubject() {
+		Email em = new Email();
+
+		em.setSubject("Incident alert today");
+		em.setBody("Actually fire reported at China today!");
+
+		Date dt = new Date();
+		SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+		em.setMessageDate(format1.format(dt));
+
+		if (checkProcessEmail(em)) {
+			List<Incident> i = em.getIncidents();
+			assertEquals(1, i.size());
+			assertIncident(new Incident("fire reported", "today", "China"), i.get(0));
+		} else {
+			fail("No incidents extracted!");
+		}
 	}
 }
